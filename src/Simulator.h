@@ -51,7 +51,9 @@ private:
     string name_team_2;
     bool has_new_name_team_1;
     bool has_new_name_team_2;
-    
+    int port;
+    string address;
+
     Report report;
     bool finish_match;
     float timeStep;
@@ -68,7 +70,7 @@ private:
     int stratStep;
     int loopBullet;
     int caseWorld;
-    
+
 	Physics* physics;
 	vector<ModelStrategy*> strategies;
 
@@ -92,7 +94,7 @@ private:
     btVector3 getRobotVelocity(RobotPhysics* robot);
 public:
 	Simulator();
-	void runSimulator(int argc, char *argv[], ModelStrategy* strategyTeam, ModelStrategy* strategyAdv, bool fast_travel, int qtd_goal, bool develop_mode);
+	void runSimulator(int argc, char *argv[], ModelStrategy* strategyTeam, ModelStrategy* strategyAdv, bool fast_travel, int qtd_goal, bool develop_mode, int port);
 
 	void runPhysics();
 	void runStrategies();

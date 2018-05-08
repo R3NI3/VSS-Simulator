@@ -39,19 +39,20 @@ public:
     }
 };
 
-bool argParse(int argc, char** argv, bool *fast_travel, int *qtd_of_goals, bool *develop_mode);
+bool argParse(int argc, char** argv, bool *fast_travel, int *qtd_of_goals, bool *develop_mode, int *port);
 
 int main(int argc, char *argv[]){
     bool fast_travel = false;
     int qtd_of_goals = 10;
     bool develop_mode = false;
+    int port;
 
-    if(argParse(argc, argv, &fast_travel, &qtd_of_goals, &develop_mode)){
+    if(argParse(argc, argv, &fast_travel, &qtd_of_goals, &develop_mode, &port)){
         Strategy *stratYellowTeam = new Strategy(); //Original strategy
         Strategy *stratBlueTeam = new Strategy(); //Strategy for tests
 
         Simulator* simulator = new Simulator();
-        simulator->runSimulator(argc, argv, stratBlueTeam, stratYellowTeam, fast_travel, qtd_of_goals, develop_mode);
+        simulator->runSimulator(argc, argv, stratBlueTeam, stratYellowTeam, fast_travel, qtd_of_goals, develop_mode, port);
     }else{
         return -1;
     }
@@ -59,7 +60,7 @@ int main(int argc, char *argv[]){
 	return 0;
 }
 
-bool argParse(int argc, char** argv, bool *fast_travel, int *qtd_of_goals, bool *develop_mode){
+bool argParse(int argc, char** argv, bool *fast_travel, int *qtd_of_goals, bool *develop_mode, int *port){
     namespace bpo = boost::program_options;
 
     // Declare the supported options.
@@ -68,6 +69,7 @@ bool argParse(int argc, char** argv, bool *fast_travel, int *qtd_of_goals, bool 
         ("help,h", "(Optional) produce help message")
         ("fast,f", "(Optional) specify if the time must go 15x faster.")
         ("develop,d", "(Optional) turn on the develop mode. the time doesn't count.")
+        ("port,p", bpo::value<int>()->default_value(5555), "(Optional) specify port to connect simulator.")
         ("qtd_of_goals,g", bpo::value<std::string>()->default_value("10"), "(Optional) specify the qtd of goals to end the game. 10 to 100");
     bpo::variables_map vm;
     bpo::store(bpo::parse_command_line(argc, argv, desc), vm);
@@ -96,6 +98,8 @@ bool argParse(int argc, char** argv, bool *fast_travel, int *qtd_of_goals, bool 
     if(*qtd_of_goals > 100){
         *qtd_of_goals = 100;
     }
+
+    *port = vm["port"].as<int>();
 
     return true;
 }

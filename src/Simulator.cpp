@@ -46,10 +46,12 @@ Simulator::Simulator(){
     has_new_name_team_2 = false;
 }
 
-void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTeam, ModelStrategy *stratYellowTeam, bool fast_travel, int qtd_of_goals, bool develop_mode){
+void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTeam, ModelStrategy *stratYellowTeam, bool fast_travel, int qtd_of_goals, bool develop_mode, int port){
     this->fast_travel = fast_travel;
     this->qtd_of_goals = qtd_of_goals;
     this->develop_mode = develop_mode;
+    this->address = "tcp://*:";
+    this->port = port;
 
     if(!fast_travel){
         timeStep = 1.f/60.f;
@@ -108,7 +110,7 @@ void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTea
 void Simulator::runReceiveTeam1(){
     // YELLOW
     Interface interface;
-    interface.createReceiveCommandsTeam1(&global_commands_team_1);
+    interface.createReceiveCommandsTeam1(&global_commands_team_1, this->address + std::to_string(port+1));
 
     while(!finish_match){
         global_commands_team_1 = vss_command::Global_Commands();
@@ -118,7 +120,7 @@ void Simulator::runReceiveTeam1(){
             status_team_1 = 0;
             cout << "---Time amarelo conectado---" << endl;
         }
-        
+
         situation_team1 = global_commands_team_1.situation();
         for(int i = 0 ; i < global_commands_team_1.robot_commands_size() ; i++){
             commands.at(i) = Command((float)global_commands_team_1.robot_commands(i).left_vel()+0.001, (float)global_commands_team_1.robot_commands(i).right_vel()+0.001);
@@ -134,7 +136,7 @@ void Simulator::runReceiveTeam1(){
 void Simulator::runReceiveTeam2(){
     // BLUE
     Interface interface;
-    interface.createReceiveCommandsTeam2(&global_commands_team_2);
+    interface.createReceiveCommandsTeam2(&global_commands_team_2, this->address + std::to_string(port+2));
 
     while(!finish_match){
         global_commands_team_2 = vss_command::Global_Commands();
@@ -164,12 +166,12 @@ void Simulator::runSender(){
     global_state.set_origin(false);
 
     if(report.total_of_goals_team[0] != goals_team_1){
-        goals_team_1 = report.total_of_goals_team[0];    
+        goals_team_1 = report.total_of_goals_team[0];
         global_state.set_goals_yellow(goals_team_1);
     }
 
     if(report.total_of_goals_team[1] != goals_team_2){
-        goals_team_2 = report.total_of_goals_team[1];    
+        goals_team_2 = report.total_of_goals_team[1];
         global_state.set_goals_blue(goals_team_2);
     }
 
@@ -252,7 +254,7 @@ void Simulator::runPhysics(){
 
     arbiter.allocPhysics(physics);
     arbiter.allocReport(&report);
-    interface_sender.createSocketSendState(&global_state);
+    interface_sender.createSocketSendState(&global_state, this->address + std::to_string(port));
 
     while(!finish_match){
         usleep(1000000.f*timeStep/handTime);
@@ -318,7 +320,7 @@ void Simulator::updateReport(){
                 report.travelled_distance_team[0][i] += velRobot.length();
             }
 
-        
+
         if(minDist > modDist){
             minDist = modDist;
             idDist = i;
@@ -347,7 +349,7 @@ void Simulator::runStrategies(){
             int id = i*numRobotsTeam + j;
             physics->getAllRobots()[id]->setTimeStep(timeStep);
         }
-            
+
     }
 
     while(!finish_match){
@@ -393,7 +395,7 @@ void Simulator::runStrategies(){
                         //invCommand[1] = strategies[i]->getRobotStrategiesTeam()[j]->getCommand()[0];
 
                         physics->getAllRobots()[id]->updateRobot(invCommand);
-                    } 
+                    }
                 }
             }
 
@@ -448,7 +450,7 @@ btVector3 Simulator::calcRelativePosition(btVector3 absPos, int attackDir){
 
         relZ = SIZE_DEPTH - absPos.getZ();
         relX = SIZE_WIDTH - absPos.getX();
-    } 
+    }
     return btVector3(relX,0,relZ);
 }
 
