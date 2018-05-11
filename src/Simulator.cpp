@@ -164,16 +164,13 @@ void Simulator::runSender(){
     global_state.set_id(0);
     global_state.set_situation(caseWorld);
     global_state.set_origin(false);
+    global_state.set_time(simTime);
 
-    if(report.total_of_goals_team[0] != goals_team_1){
-        goals_team_1 = report.total_of_goals_team[0];
-        global_state.set_goals_yellow(goals_team_1);
-    }
+    goals_team_1 = report.total_of_goals_team[0];
+    global_state.set_goals_yellow(goals_team_1);
 
-    if(report.total_of_goals_team[1] != goals_team_2){
-        goals_team_2 = report.total_of_goals_team[1];
-        global_state.set_goals_blue(goals_team_2);
-    }
+    goals_team_2 = report.total_of_goals_team[1];
+    global_state.set_goals_blue(goals_team_2);
 
     if(has_new_name_team_1){
         has_new_name_team_1 = false;
@@ -273,6 +270,7 @@ void Simulator::runPhysics(){
         runningPhysics = true;
 
         arbiter.checkWorld();
+        simTime = arbiter.checkTime();
 
         if(!develop_mode){
             if(report.total_of_goals_team[0] >= qtd_of_goals || report.total_of_goals_team[1] >= qtd_of_goals || report.qtd_of_steps > 3500*qtd_of_goals){

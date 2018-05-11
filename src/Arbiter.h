@@ -6,7 +6,7 @@
 #include "Sir.h"
 #include "Physics.h"
 
-using namespace std; 
+using namespace std;
 
 //! Classe responsável por verificar ocorrencias como: gol, penalti e falta. Também é responsável por monitorar o tempo e reposicionar os objetos em campo.
 class Arbiter{
@@ -23,6 +23,7 @@ public:
 	void allocPhysics(Physics*);
 	void allocReport(Report*);
 	int checkWorld();
+	int checkTime();
 
 	void position_objects_after_goal_team_1();
 	void position_objects_after_goal_team_2();

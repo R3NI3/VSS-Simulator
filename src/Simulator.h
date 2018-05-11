@@ -58,6 +58,7 @@ private:
     bool finish_match;
     float timeStep;
     float handTime;
+    int simTime;
     int numRobotsTeam;
     bool runningPhysics;
     vector<Command> commands;
