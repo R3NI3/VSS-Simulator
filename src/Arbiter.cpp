@@ -2,7 +2,7 @@
 
 Arbiter::Arbiter(){
 	refresh = false;
-	relative_qtd_steps = 0;
+	minutes = 0;
 }
 
 void Arbiter::allocPhysics(Physics *physics){
@@ -35,29 +35,30 @@ int Arbiter::checkWorld(){
 	vector<RobotPhysics*> listRobots = physics->getAllRobots();
 
 	//! A cada minuto mostra o tempo, isto é, 1 min, 2 min, n min.
-	if(report->qtd_of_steps%3500 == 0){
+	if(report->qtd_of_steps/3600 >= minutes+1){
 		//! É necessário verificar dessa maneira, pois como qtd_of_steps é um variavel que roda na simulação de física
 		//! e a simulação física trabalha em uma frequência maior que o resto do programa, nem sempre o loop no "valor 3500"
 		//! caia na verificação. Dessa forma é garantido que sempre irá ser printado o tempo a cada minuto
-		cout << "---" << relative_qtd_steps / 3500 << " MIN---" << endl;
+		minutes++;
+		cout << "---" << minutes << " MIN---" << endl;
+		//cout << "steps:"<<report->qtd_of_steps<<" time:" << checkTimeMin() << endl;
 	}
-	relative_qtd_steps++;
-	
+
 	report->qtd_of_steps++;
 
 	return situation;
 }
 
 int Arbiter::checkTimeMin(){
-	return relative_qtd_steps / 3500;
+	return minutes;
 }
 
 unsigned int Arbiter::checkTimeMs(){
-	return relative_qtd_steps * (1000.f/60.f);//steps * simulation_step_size
+	return report->qtd_of_steps * (1000.f/60.f);//steps * simulation_step_size
 }
 
 int Arbiter::getSteps(){
-	return relative_qtd_steps;
+	return report->qtd_of_steps;
 }
 
 void Arbiter::position_objects_after_goal_team_1(){
