@@ -15,7 +15,7 @@ protected:
 	Report *report;
 	btVector3 history_ball;
 	int ball_count;
-	int relative_qtd_steps;
+	int minutes;
 public:
 	bool refresh;
 	Arbiter();
