@@ -23,7 +23,9 @@ public:
 	void allocPhysics(Physics*);
 	void allocReport(Report*);
 	int checkWorld();
-	int checkTime();
+	int getSteps();
+	int checkTimeMin();
+	unsigned int checkTimeMs();
 
 	void position_objects_after_goal_team_1();
 	void position_objects_after_goal_team_2();

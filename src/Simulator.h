@@ -93,9 +93,18 @@ private:
     btVector3 getRobotOrientation(RobotPhysics* robot);
     btVector3 getRobotPosition(RobotPhysics* robot);
     btVector3 getRobotVelocity(RobotPhysics* robot);
+
+    //Auto simulation speed control:
+    unsigned int delay;       //miliseconds
+    unsigned int commandFreq; //miliseconds/command
+    unsigned int desiredFreq; //miliseconds/command
+
+    unsigned int calculateCommandFreq();
+    unsigned int adjustDelay(unsigned int currentDelay, unsigned int currtFreq, unsigned int desiredFreq);
+
 public:
 	Simulator();
-	void runSimulator(int argc, char *argv[], ModelStrategy* strategyTeam, ModelStrategy* strategyAdv, bool fast_travel, int qtd_goal, bool develop_mode, int port);
+	void runSimulator(int argc, char *argv[], ModelStrategy* strategyTeam, ModelStrategy* strategyAdv, int rate, int qtd_goal, bool develop_mode, int port, bool randInit);
 
 	void runPhysics();
 	void runStrategies();
