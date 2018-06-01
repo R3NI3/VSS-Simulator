@@ -39,20 +39,21 @@ public:
     }
 };
 
-bool argParse(int argc, char** argv, bool *fast_travel, int *qtd_of_goals, bool *develop_mode, int *port);
+bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, bool *develop_mode, int *port, bool *random);
 
 int main(int argc, char *argv[]){
-    bool fast_travel = false;
+    int rate = false;
     int qtd_of_goals = 10;
     bool develop_mode = false;
+    bool rand_init = false;
     int port;
 
-    if(argParse(argc, argv, &fast_travel, &qtd_of_goals, &develop_mode, &port)){
+    if(argParse(argc, argv, &rate, &qtd_of_goals, &develop_mode, &port, &rand_init)){
         Strategy *stratYellowTeam = new Strategy(); //Original strategy
         Strategy *stratBlueTeam = new Strategy(); //Strategy for tests
 
         Simulator* simulator = new Simulator();
-        simulator->runSimulator(argc, argv, stratBlueTeam, stratYellowTeam, fast_travel, qtd_of_goals, develop_mode, port);
+        simulator->runSimulator(argc, argv, stratBlueTeam, stratYellowTeam, rate, qtd_of_goals, develop_mode, port, rand_init);
     }else{
         return -1;
     }
@@ -60,15 +61,16 @@ int main(int argc, char *argv[]){
 	return 0;
 }
 
-bool argParse(int argc, char** argv, bool *fast_travel, int *qtd_of_goals, bool *develop_mode, int *port){
+bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, bool *develop_mode, int *port, bool *random){
     namespace bpo = boost::program_options;
 
     // Declare the supported options.
     bpo::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "(Optional) produce help message")
-        ("fast,f", "(Optional) specify if the time must go 15x faster.")
+        ("rate,r", bpo::value<int>()->default_value(250), "Desired command rate. Default: 250ms")
         ("develop,d", "(Optional) turn on the develop mode. the time doesn't count.")
+        ("random,a", "(Optional) start objects at random positions, good for training.")
         ("port,p", bpo::value<int>()->default_value(5555), "(Optional) specify port to connect simulator.")
         ("qtd_of_goals,g", bpo::value<std::string>()->default_value("10"), "(Optional) specify the qtd of goals to end the game. 10 to 100");
     bpo::variables_map vm;
@@ -80,12 +82,14 @@ bool argParse(int argc, char** argv, bool *fast_travel, int *qtd_of_goals, bool 
         return false;
     }
 
-    if (vm.count("fast")){
-        *fast_travel = true;
-    }
+    *rate = vm["rate"].as<int>();
 
     if (vm.count("develop")){
         *develop_mode = true;
+    }
+
+    if (vm.count("random")){
+        *random = true;
     }
 
     stringstream ss;

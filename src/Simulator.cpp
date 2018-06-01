@@ -46,21 +46,21 @@ Simulator::Simulator(){
     has_new_name_team_2 = false;
 }
 
-void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTeam, ModelStrategy *stratYellowTeam, bool fast_travel, int qtd_of_goals, bool develop_mode, int port){
+void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTeam, ModelStrategy *stratYellowTeam, 
+                             int rate, int qtd_of_goals, bool develop_mode, int port, bool randInit){
     this->fast_travel = fast_travel;
     this->qtd_of_goals = qtd_of_goals;
     this->develop_mode = develop_mode;
     this->address = "tcp://*:";
     this->port = port;
 
-    if(!fast_travel){
-        timeStep = 1.f/60.f;
-        handTime = 1.f;
-    }else{
-        timeStep = 1.f/60.f;
-        handTime = 15.f;
-    }
-
+    
+    //sim speed control
+    delay = 7000;//1000000.f*timeStep/handTime; handTime = 1.f;
+    timeStep = 1.f/60.f;
+    desiredFreq = commandFreq = rate;        
+    cout << "Sincro time:" << desiredFreq << endl;
+    
     int numTeams = 0;
 	if(stratBlueTeam) {
 		this->strategies.push_back(stratBlueTeam);
@@ -77,7 +77,7 @@ void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTea
 		exit(1);
 	}
 
-	physics = new Physics(numTeams);
+	physics = new Physics(numTeams, randInit);
 
     vector<RobotPhysics*> gRobots = physics->getAllRobots();
 
@@ -115,6 +115,10 @@ void Simulator::runReceiveTeam1(){
     while(!finish_match){
         global_commands_team_1 = vss_command::Global_Commands();
         interface.receiveCommandTeam1();
+        //cout << "Team1" << endl;
+        commandFreq = calculateCommandFreq();
+        delay = adjustDelay(delay, commandFreq, desiredFreq);
+
 
         if(status_team_1 == -1){
             status_team_1 = 0;
@@ -141,6 +145,8 @@ void Simulator::runReceiveTeam2(){
     while(!finish_match){
         global_commands_team_2 = vss_command::Global_Commands();
         interface.receiveCommandTeam2();
+        //cout << "Team2" << endl;
+        commandFreq = calculateCommandFreq();
 
         if(status_team_2 == -1){
             status_team_2 = 0;
@@ -245,6 +251,45 @@ void Simulator::runSender(){
     interface_sender.sendState();
 }
 
+unsigned int Simulator::calculateCommandFreq() {
+    unsigned int currentTime = arbiter.checkTimeMs();
+    static unsigned int lastTime = currentTime;
+    unsigned int deltaT;
+
+    if (currentTime<lastTime) {
+        deltaT = lastTime;
+    } else {
+        deltaT = (currentTime - lastTime);
+    }
+    lastTime = currentTime;
+
+    return deltaT;
+}   
+
+unsigned int Simulator::adjustDelay(unsigned int currentDelay, unsigned int currtFreq, unsigned int desiredFreq) {
+    //performe a moving average on input frequency:
+    static long int avgFreq = currtFreq;
+    float w = 0.75;
+    avgFreq = (1-w)*((long int)currtFreq) + w*(avgFreq);
+    //cout << "AvgFreq: " << avgFreq << endl;
+
+    //PID Control of the output delay:
+    const float K = 5; //proportional of a PID
+    
+    //cout << "desiredFreq:" << desiredFreq << " currtFreq:" << currtFreq << endl;
+    int error = avgFreq-desiredFreq; 
+    long int delay = currentDelay + K*error;
+    //cout << "error:" << error << " prevDelay:" << currentDelay << " newDelay:" << delay << endl;
+
+    if (delay>50000) {
+        cerr << "Warning, delay limit reached (<20000us): " << delay << endl;
+        delay = 50000;
+    }
+    if (delay<0) delay = 0;
+
+    return delay;
+}
+
 void Simulator::runPhysics(){
     int subStep = 1;
     float standStep = 1.f/60.f;
@@ -254,7 +299,7 @@ void Simulator::runPhysics(){
     interface_sender.createSocketSendState(&global_state, this->address + std::to_string(port));
 
     while(!finish_match){
-        usleep(1000000.f*timeStep/handTime);
+        usleep(delay);
 
         //physics->setBallVelocity(btVector3(0.1, 0, 0));
         loopBullet++;
@@ -270,7 +315,7 @@ void Simulator::runPhysics(){
         runningPhysics = true;
 
         arbiter.checkWorld();
-        simTime = arbiter.checkTime();
+        simTime = arbiter.checkTimeMin();
 
         if(!develop_mode){
             if(report.total_of_goals_team[0] >= qtd_of_goals || report.total_of_goals_team[1] >= qtd_of_goals || report.qtd_of_steps > 3500*qtd_of_goals){
@@ -351,7 +396,7 @@ void Simulator::runStrategies(){
     }
 
     while(!finish_match){
-        usleep(1000000.f*timeStep/handTime);
+        usleep(delay);
 
         if(!gameState->sameState){
             updateWorld();
