@@ -56,7 +56,7 @@ void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTea
 
     
     //sim speed control
-    delay = 7000;//1000000.f*timeStep/handTime; handTime = 1.f;
+    delay = 15000;//1000000.f*timeStep/handTime; handTime = 1.f;
     timeStep = 1.f/60.f;
     desiredFreq = commandFreq = rate;        
     cout << "Sincro time:" << desiredFreq << endl;
