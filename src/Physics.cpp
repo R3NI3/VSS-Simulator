@@ -104,6 +104,8 @@ void Physics::registBodies(bool randInit){
             posTeam2.push_back(pos2);
 
         }
+		  //Random velocity for ball
+		  setBallVelocity(btVector3((8*rand()%100)/100.0-4, 0, (8*rand()%100)/100.0-4));
     } else {
         addBall(2.5, btVector3(85, 0, 65), 0.08); //center
         posTeam1 = vector <btVector3> {btVector3(25,4,SIZE_DEPTH- 55),btVector3(35,4,30),btVector3(55,4,45)};
