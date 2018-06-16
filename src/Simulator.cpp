@@ -128,6 +128,7 @@ void Simulator::runReceiveTeam1(){
         situation_team1 = global_commands_team_1.situation();
         for(int i = 0 ; i < global_commands_team_1.robot_commands_size() ; i++){
             commands.at(i) = Command((float)global_commands_team_1.robot_commands(i).left_vel()+0.001, (float)global_commands_team_1.robot_commands(i).right_vel()+0.001);
+            //commands.at(i) = Command(10, -10);
         }
 
         if(global_commands_team_1.has_name()){
@@ -238,6 +239,7 @@ void Simulator::runSender(){
         robot_s->mutable_v_pose()->set_x(velRobot.getX());
         robot_s->mutable_v_pose()->set_y(velRobot.getZ());
         robot_s->mutable_v_pose()->set_yaw(0);
+        cout << getRobotAngVelocity(listRobots.at(i)).getY() << endl;
 
         robot_s->mutable_k_pose()->set_x(0);
         robot_s->mutable_k_pose()->set_y(0);
@@ -422,7 +424,7 @@ void Simulator::runStrategies(){
                     int id = i*numRobotsTeam + j;
                     if(strategies[i]->getAttackDir() == 1){
                         //cout << id << endl;
-                        float command[2] = { commands.at(id).left, commands.at(id).right };
+                        float command[2] = {10,-10};//{ commands.at(id).left, commands.at(id).right };
                         //if(id == 0)
                             //cout << command[0] << " - " << command[1] << endl;
 
@@ -510,4 +512,8 @@ btVector3 Simulator::getRobotOrientation(RobotPhysics* robot){
 
 btVector3 Simulator::getRobotVelocity(RobotPhysics* robot){
     return robot->getRigidBody()->getLinearVelocity();
+}
+
+btVector3 Simulator::getRobotAngVelocity(RobotPhysics* robot){
+    return robot->getRigidBody()->getAngularVelocity();
 }
