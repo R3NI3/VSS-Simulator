@@ -214,7 +214,7 @@ void Simulator::runSender(){
 
         robot_s->mutable_v_pose()->set_x(velRobot.getX());
         robot_s->mutable_v_pose()->set_y(velRobot.getZ());
-        robot_s->mutable_v_pose()->set_yaw(0);
+        robot_s->mutable_v_pose()->set_yaw(getRobotAngVelocity(listRobots.at(i+3)).getY());
 
         robot_s->mutable_k_pose()->set_x(0);
         robot_s->mutable_k_pose()->set_y(0);
@@ -237,7 +237,8 @@ void Simulator::runSender(){
 
         robot_s->mutable_v_pose()->set_x(velRobot.getX());
         robot_s->mutable_v_pose()->set_y(velRobot.getZ());
-        robot_s->mutable_v_pose()->set_yaw(0);
+        robot_s->mutable_v_pose()->set_yaw(getRobotAngVelocity(listRobots.at(i)).getY());
+        //cout << getRobotAngVelocity(listRobots.at(i)).getY() << endl;
 
         robot_s->mutable_k_pose()->set_x(0);
         robot_s->mutable_k_pose()->set_y(0);
@@ -269,23 +270,25 @@ unsigned int Simulator::calculateCommandFreq() {
 unsigned int Simulator::adjustDelay(unsigned int currentDelay, unsigned int currtFreq, unsigned int desiredFreq) {
     //performe a moving average on input frequency:
     static long int avgFreq = currtFreq;
-    float w = 0.75;
+    float w = 0.9;
     avgFreq = (1-w)*((long int)currtFreq) + w*(avgFreq);
     //cout << "AvgFreq: " << avgFreq << endl;
 
     //PID Control of the output delay:
-    const float K = 5; //proportional of a PID
+    const float K = 3; //proportional of a PID
     
     //cout << "desiredFreq:" << desiredFreq << " currtFreq:" << currtFreq << endl;
     int error = avgFreq-desiredFreq; 
     long int delay = currentDelay + K*error;
     //cout << "error:" << error << " prevDelay:" << currentDelay << " newDelay:" << delay << endl;
 
-    if (delay>50000) {
-        cerr << "Warning, delay limit reached (<20000us): " << delay << endl;
-        delay = 50000;
+    if (delay>100000) {
+        cerr << "Warning, delay limit reached (>100000): " << delay << endl;
     }
-    if (delay<0) delay = 0;
+    if (delay<0) {
+        cerr << "Warning, delay < 0: " << delay << endl;
+        delay = 0;
+    }
 
     return delay;
 }
@@ -315,7 +318,7 @@ void Simulator::runPhysics(){
         runningPhysics = true;
 
         arbiter.checkWorld();
-        simTime = arbiter.checkTimeMin();
+        simTime = arbiter.checkTimeMs();
 
         if(!develop_mode){
             if(report.total_of_goals_team[0] >= qtd_of_goals || report.total_of_goals_team[1] >= qtd_of_goals || report.qtd_of_steps > 3500*qtd_of_goals){
@@ -510,4 +513,8 @@ btVector3 Simulator::getRobotOrientation(RobotPhysics* robot){
 
 btVector3 Simulator::getRobotVelocity(RobotPhysics* robot){
     return robot->getRigidBody()->getLinearVelocity();
+}
+
+btVector3 Simulator::getRobotAngVelocity(RobotPhysics* robot){
+    return robot->getRigidBody()->getAngularVelocity();
 }

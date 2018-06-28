@@ -16,6 +16,8 @@ protected:
 	btVector3 history_ball;
 	int ball_count;
 	int minutes;
+    long int sysLastTime;
+    long int simLastTime;
 public:
 	bool refresh;
 	Arbiter();
@@ -26,6 +28,7 @@ public:
 	int getSteps();
 	int checkTimeMin();
 	unsigned int checkTimeMs();
+    long int sysTimeMS();
 
 	void position_objects_after_goal_team_1();
 	void position_objects_after_goal_team_2();
