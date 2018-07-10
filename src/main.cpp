@@ -69,6 +69,7 @@ bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, bool *develop
     desc.add_options()
         ("help,h", "(Optional) produce help message")
         ("rate,r", bpo::value<int>()->default_value(250), "Desired command rate. Default: 250ms")
+        ("fixed,f", "(Optional) rate becomes a fixed delay value")
         ("develop,d", "(Optional) turn on the develop mode. the time doesn't count.")
         ("random,a", "(Optional) start objects at random positions, good for training.")
         ("port,p", bpo::value<int>()->default_value(5555), "(Optional) specify port to connect simulator.")
@@ -82,7 +83,12 @@ bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, bool *develop
         return false;
     }
 
-    *rate = vm["rate"].as<int>();
+    if (vm.count("fixed")){
+        *rate = -vm["rate"].as<int>();
+         std::cout << "fixed rate" << std::endl;
+    } else {
+        *rate = vm["rate"].as<int>();
+    }
 
     if (vm.count("develop")){
         *develop_mode = true;

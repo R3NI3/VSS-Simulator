@@ -23,6 +23,7 @@ copies or substantial portions of the Software.
 
 const Color clrTeams[] = {Color(1.0,1.0,0),Color(0,0,1)};
 const Color clrPlayers[] = {Color(1,0,0),Color(0,1,0),Color(1,0.5,0.5)};
+const float SIMULATION_TIME_STEP = (1.f/60.f);
 
 class Physics{
 private:

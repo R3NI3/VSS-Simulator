@@ -56,9 +56,17 @@ void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTea
 
     
     //sim speed control
-    delay = 15000;//1000000.f*timeStep/handTime; handTime = 1.f;
-    timeStep = 1.f/60.f;
-    desiredFreq = commandFreq = rate;        
+    if (rate<0) {
+        desiredFreq = rate; //(negative values for a fixed simulation delay)
+        delay = -rate;
+    }
+    else {
+        delay = 9000;//1000000.f*timeStep/handTime; handTime = 1.f;
+        desiredFreq = commandFreq = rate;  
+    }
+
+    timeStep = SIMULATION_TIME_STEP;
+
     cout << "Sincro time:" << desiredFreq << endl;
     
     int numTeams = 0;
@@ -267,11 +275,14 @@ unsigned int Simulator::calculateCommandFreq() {
     return deltaT;
 }   
 
-unsigned int Simulator::adjustDelay(unsigned int currentDelay, unsigned int currtFreq, unsigned int desiredFreq) {
+unsigned int Simulator::adjustDelay(int currentDelay, int currtFreq, int desiredFreq) {
+    if (desiredFreq<0)
+        return delay;
+
     //performe a moving average on input frequency:
-    static long int avgFreq = currtFreq;
+    static int avgFreq = currtFreq;
     float w = 0.9;
-    avgFreq = (1-w)*((long int)currtFreq) + w*(avgFreq);
+    avgFreq = (1-w)*((int)currtFreq) + w*(avgFreq);
     //cout << "AvgFreq: " << avgFreq << endl;
 
     //PID Control of the output delay:
@@ -295,7 +306,7 @@ unsigned int Simulator::adjustDelay(unsigned int currentDelay, unsigned int curr
 
 void Simulator::runPhysics(){
     int subStep = 1;
-    float standStep = 1.f/60.f;
+    float standStep = SIMULATION_TIME_STEP;
 
     arbiter.allocPhysics(physics);
     arbiter.allocReport(&report);

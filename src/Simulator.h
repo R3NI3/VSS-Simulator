@@ -96,12 +96,12 @@ private:
     btVector3 getRobotAngVelocity(RobotPhysics* robot);
 
     //Auto simulation speed control:
-    unsigned int delay;       //miliseconds
-    unsigned int commandFreq; //miliseconds/command
-    unsigned int desiredFreq; //miliseconds/command
+    int delay;       //miliseconds
+    int commandFreq; //miliseconds/command
+    int desiredFreq; //miliseconds/command
 
     unsigned int calculateCommandFreq();
-    unsigned int adjustDelay(unsigned int currentDelay, unsigned int currtFreq, unsigned int desiredFreq);
+    unsigned int adjustDelay(int currentDelay, int currtFreq, int desiredFreq);
 
 public:
 	Simulator();

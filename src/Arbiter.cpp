@@ -81,7 +81,7 @@ int Arbiter::checkTimeMin(){
 }
 
 unsigned int Arbiter::checkTimeMs(){
-	return report->qtd_of_steps * (1000.f/60.f);//steps * simulation_step_size
+	return report->qtd_of_steps * SIMULATION_TIME_STEP*1000;//steps * simulation_step_size in ms
 }
 
 int Arbiter::getSteps(){
