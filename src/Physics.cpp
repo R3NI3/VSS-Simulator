@@ -78,7 +78,7 @@ void Physics::registBodies(bool randInit){
     int x1,x2,z1,z2;
 
     if(randInit){
-        posBall.push_back(btVector3((rand()%130)+20, 0, (rand()%110)+10));
+        posBall.push_back(btVector3(85, 0, (rand()%110)+10));
         addBall(2.5, posBall[0], 0.08);
 
         for(int i = 0;i < numRobotsTeam;i++){
@@ -105,7 +105,7 @@ void Physics::registBodies(bool randInit){
 
         }
 		  //Random velocity for ball
-		  setBallVelocity(btVector3((8*rand()%100)/100.0-4, 0, (8*rand()%100)/100.0-4));
+		  setBallVelocity(btVector3((2*(rand()%100))/100.0-1, 0, (8*(rand()%100))/100.0-4));
     } else {
         addBall(2.5, btVector3(85, 0, 65), 0.08); //center
         posTeam1 = vector <btVector3> {btVector3(25,4,SIZE_DEPTH- 55),btVector3(35,4,30),btVector3(55,4,45)};
