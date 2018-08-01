@@ -105,7 +105,8 @@ private:
 
 public:
 	Simulator();
-	void runSimulator(int argc, char *argv[], ModelStrategy* strategyTeam, ModelStrategy* strategyAdv, int rate, int qtd_goal, bool develop_mode, int port, bool randInit);
+	void runSimulator(int argc, char *argv[], ModelStrategy* strategyTeam, ModelStrategy* strategyAdv, 
+                      int rate, int qtd_goal, bool develop_mode, int port, bool randInit, int distance);
 
 	void runPhysics();
 	void runStrategies();

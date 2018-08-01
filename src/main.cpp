@@ -39,7 +39,8 @@ public:
     }
 };
 
-bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, bool *develop_mode, int *port, bool *random);
+bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, 
+              bool *develop_mode, int *port, bool *random, int *distance);
 
 int main(int argc, char *argv[]){
     int rate = false;
@@ -47,13 +48,15 @@ int main(int argc, char *argv[]){
     bool develop_mode = false;
     bool rand_init = false;
     int port;
+    int dist = 65;
 
-    if(argParse(argc, argv, &rate, &qtd_of_goals, &develop_mode, &port, &rand_init)){
+    if(argParse(argc, argv, &rate, &qtd_of_goals, &develop_mode, &port, &rand_init, &dist)){
         Strategy *stratYellowTeam = new Strategy(); //Original strategy
         Strategy *stratBlueTeam = new Strategy(); //Strategy for tests
 
         Simulator* simulator = new Simulator();
-        simulator->runSimulator(argc, argv, stratBlueTeam, stratYellowTeam, rate, qtd_of_goals, develop_mode, port, rand_init);
+        simulator->runSimulator(argc, argv, stratBlueTeam, stratYellowTeam, rate,
+                                qtd_of_goals, develop_mode, port, rand_init, dist);
     }else{
         return -1;
     }
@@ -61,7 +64,9 @@ int main(int argc, char *argv[]){
 	return 0;
 }
 
-bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, bool *develop_mode, int *port, bool *random){
+bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, 
+              bool *develop_mode, int *port, bool *random,
+              int *dist){
     namespace bpo = boost::program_options;
 
     // Declare the supported options.
@@ -69,6 +74,7 @@ bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, bool *develop
     desc.add_options()
         ("help,h", "(Optional) produce help message")
         ("rate,r", bpo::value<int>()->default_value(250), "Desired command rate. Default: 250ms")
+        ("distance,l", bpo::value<int>()->default_value(0), "Distance Ball to goals, 0 to disconsider, Default: 0")
         ("fixed,f", "(Optional) rate becomes a fixed delay value")
         ("develop,d", "(Optional) turn on the develop mode. the time doesn't count.")
         ("random,a", "(Optional) start objects at random positions, good for training.")
@@ -89,6 +95,11 @@ bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, bool *develop
     } else {
         *rate = vm["rate"].as<int>();
     }
+
+    if (vm.count("distance")){
+        *dist = vm["distance"].as<int>();
+    }
+    
 
     if (vm.count("develop")){
         *develop_mode = true;

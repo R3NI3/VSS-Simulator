@@ -47,7 +47,7 @@ Simulator::Simulator(){
 }
 
 void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTeam, ModelStrategy *stratYellowTeam, 
-                             int rate, int qtd_of_goals, bool develop_mode, int port, bool randInit){
+                             int rate, int qtd_of_goals, bool develop_mode, int port, bool randInit, int dist){
     this->fast_travel = fast_travel;
     this->qtd_of_goals = qtd_of_goals;
     this->develop_mode = develop_mode;
@@ -61,7 +61,7 @@ void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTea
         delay = -rate;
     }
     else {
-        delay = 9000;//1000000.f*timeStep/handTime; handTime = 1.f;
+        delay = 10000;//1000000.f*timeStep/handTime; handTime = 1.f;
         desiredFreq = commandFreq = rate;  
     }
 
@@ -85,7 +85,7 @@ void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTea
 		exit(1);
 	}
 
-	physics = new Physics(numTeams, randInit);
+	physics = new Physics(numTeams, randInit, dist);
 
     vector<RobotPhysics*> gRobots = physics->getAllRobots();
 
@@ -119,14 +119,12 @@ void Simulator::runReceiveTeam1(){
     // YELLOW
     Interface interface;
     interface.createReceiveCommandsTeam1(&global_commands_team_1, this->address + std::to_string(port+1));
-
     while(!finish_match){
         global_commands_team_1 = vss_command::Global_Commands();
         interface.receiveCommandTeam1();
         //cout << "Team1" << endl;
         commandFreq = calculateCommandFreq();
         delay = adjustDelay(delay, commandFreq, desiredFreq);
-
 
         if(status_team_1 == -1){
             status_team_1 = 0;

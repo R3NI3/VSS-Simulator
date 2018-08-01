@@ -15,7 +15,7 @@ copies or substantial portions of the Software.
 
 #include "Physics.h"
 
-Physics::Physics(int numTeams, bool randInit){
+Physics::Physics(int numTeams, bool randInit, int dist){
     this->numTeams = numTeams;
     this->numRobotsTeam = NUM_ROBOTS_TEAM;
 
@@ -30,7 +30,7 @@ Physics::Physics(int numTeams, bool randInit){
     world->setDebugDrawer(glDebugDrawer);
     gContactAddedCallback = callBackHitFunc;
 
-    registBodies(randInit);
+    registBodies(randInit, dist);
 }
 
 Physics::~Physics(){
@@ -68,7 +68,7 @@ bool check_dist(vector <btVector3> vec, btVector3 t){
     return ret;
 }
 
-void Physics::registBodies(bool randInit){
+void Physics::registBodies(bool randInit, int dist){
     addFloor();
     time_t t;
     srand((unsigned) time(&t));
@@ -78,7 +78,11 @@ void Physics::registBodies(bool randInit){
     int x1,x2,z1,z2;
 
     if(randInit){
-        posBall.push_back(btVector3(85, 0, (rand()%110)+10));
+        int i = rand()%2;
+        if (i)
+            posBall.push_back(btVector3((rand()%dist)+10, 0, (rand()%110)+10));
+        else
+            posBall.push_back(btVector3(160-(rand()%dist), 0, (rand()%110)+10));
         addBall(2.5, posBall[0], 0.08);
 
         for(int i = 0;i < numRobotsTeam;i++){
