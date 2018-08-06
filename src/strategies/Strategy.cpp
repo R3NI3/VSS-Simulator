@@ -48,7 +48,6 @@ void Strategy::runStrategy(vector<RobotStrategy*> robotStrategiesTeam,vector<Rob
     this->robotStrategiesAdv = robotStrategiesAdv;
     this->ballPos = ballPos;
 
-
     if(strategyHistory.size() == numFramesPerSec){
         updateDynamics();
         calcBallTarget();
@@ -102,13 +101,13 @@ void Strategy::updateFunctions(){
         int distanceRobotBall = (robotStrategiesTeam[i]->getPosition() - ballTarget).length();
 
         switch(robotStrategiesTeam[i]->getId()){
-            case 0:{
+            case 2:{
                 robotStrategiesTeam[i]->setLocalFunction(LocalFunc::goal);
             }break;
             case 1:{               
                 robotStrategiesTeam[i]->setLocalFunction(LocalFunc::deffense);
             }break;
-            case 2:{
+            case 0:{
                 robotStrategiesTeam[i]->setLocalFunction(LocalFunc::attack);
             }break;
         }
@@ -117,8 +116,9 @@ void Strategy::updateFunctions(){
 
 void Strategy::controlLocalStrategy(RobotStrategy* robotStrategy){
     updateTargetPosition(robotStrategy);
-   if(!updateTwistAction(robotStrategy))
+   if(!updateTwistAction(robotStrategy)){
        updateLocalFuncAction(robotStrategy);
+   }
 
    updateActionStopped(robotStrategy);
 
@@ -237,10 +237,10 @@ void Strategy::updateDeffenseStrategyAction(RobotStrategy* robotStrategy){
 }
 
 void Strategy::updateAttackStrategyAction(RobotStrategy* robotStrategy){
-    float actXArea = 0.5*SIZE_WIDTH;
-    float actXPoint = 0.8*SIZE_WIDTH;
+    float actXArea = 0*SIZE_WIDTH;
+    float actXPoint = 1*SIZE_WIDTH;
     float actZPoint = (ballPos.getZ() > SIZE_DEPTH/2) ? SIZE_DEPTH/5 : 4*SIZE_DEPTH/5;
-    float noReflecArea = 0.8*SIZE_WIDTH;
+    float noReflecArea = 0*SIZE_WIDTH;
 
     if(actXArea < robotStrategy->getTargetPosition().getX()){
         if(ballPos.getX() > noReflecArea){

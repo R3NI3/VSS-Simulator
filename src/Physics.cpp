@@ -15,9 +15,9 @@ copies or substantial portions of the Software.
 
 #include "Physics.h"
 
-Physics::Physics(int numTeams, bool randInit){
+Physics::Physics(int numTeams, bool randInit, int numRobotsTeam){
     this->numTeams = numTeams;
-    this->numRobotsTeam = NUM_ROBOTS_TEAM;
+    this->numRobotsTeam = numRobotsTeam;
 
 	collisionConfig = new btDefaultCollisionConfiguration();
     dispatcher = new btCollisionDispatcher(collisionConfig);
@@ -76,32 +76,31 @@ void Physics::registBodies(bool randInit){
     vector <btVector3> posTeam2;
     vector <btVector3> posBall;
     int x1,x2,z1,z2;
-
     if(randInit){
         posBall.push_back(btVector3(85, 0, (rand()%110)+10));
         addBall(2.5, posBall[0], 0.08);
 
         for(int i = 0;i < numRobotsTeam;i++){
-        x1 = (rand()%130)+20;
-        x2 = (rand()%130)+20;
-        z1 = (rand()%110)+10;
-        z2 = (rand()%110)+10;
+            x1 = (rand()%130)+20;
+            x2 = (rand()%130)+20;
+            z1 = (rand()%110)+10;
+            z2 = (rand()%110)+10;
 
-        btVector3 pos1 = btVector3(x1, 4, z1);
-        btVector3 pos2 = btVector3(x2, 4, z2);
+            btVector3 pos1 = btVector3(x1, 4, z1);
+            btVector3 pos2 = btVector3(x2, 4, z2);
 
-            while (!(check_dist(posTeam1, pos1) && check_dist(posTeam2, pos1) && check_dist(posBall, pos1))){
-                x1 = (rand()%130)+20;
-                z1 = (rand()%110)+10;
-                pos1 = btVector3(x1, 4, z1);
-            }
-            posTeam1.push_back(pos1);
-            while (!(check_dist(posTeam1, pos2) && check_dist(posTeam2, pos2) && check_dist(posBall, pos2))){
-                x2 = (rand()%130)+20;
-                z2 = (rand()%110)+10;
-                pos2 = btVector3(x2, 4, z2);
-            }
-            posTeam2.push_back(pos2);
+                while (!(check_dist(posTeam1, pos1) && check_dist(posTeam2, pos1) && check_dist(posBall, pos1))){
+                    x1 = (rand()%130)+20;
+                    z1 = (rand()%110)+10;
+                    pos1 = btVector3(x1, 4, z1);
+                }
+                posTeam1.push_back(pos1);
+                while (!(check_dist(posTeam1, pos2) && check_dist(posTeam2, pos2) && check_dist(posBall, pos2))){
+                    x2 = (rand()%130)+20;
+                    z2 = (rand()%110)+10;
+                    pos2 = btVector3(x2, 4, z2);
+                }
+                posTeam2.push_back(pos2);
 
         }
 		  //Random velocity for ball
@@ -393,7 +392,6 @@ btRigidBody* Physics::addCorner(Color clr, btVector3 pos,float width, float heig
 RobotPhysics* Physics::addRobot(Color clr, btVector3 pos, btVector3 rotation,float sizeRobot, float mass,Color colorPlayer,Color colorTeam, int id){
     btBoxShape* modelShape = new btBoxShape(btVector3(sizeRobot/2,sizeRobot/2,sizeRobot/2));
     btCompoundShape* compound = new btCompoundShape();
-
     btTransform localTrans;
     localTrans.setIdentity();
     localTrans.setOrigin(btVector3(0.0,4.0,0));

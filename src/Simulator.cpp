@@ -47,7 +47,7 @@ Simulator::Simulator(){
 }
 
 void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTeam, ModelStrategy *stratYellowTeam, 
-                             int rate, int qtd_of_goals, bool develop_mode, int port, bool randInit){
+                             int rate, int qtd_of_goals, bool develop_mode, int port, bool randInit, bool simple_sim){
     this->fast_travel = fast_travel;
     this->qtd_of_goals = qtd_of_goals;
     this->develop_mode = develop_mode;
@@ -85,8 +85,12 @@ void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTea
 		exit(1);
 	}
 
-	physics = new Physics(numTeams, randInit);
-
+    if(simple_sim){
+        numRobotsTeam = 1;
+        physics = new Physics(numTeams, randInit, numRobotsTeam);
+    } else {
+        physics = new Physics(numTeams, randInit, numRobotsTeam);
+    }
     vector<RobotPhysics*> gRobots = physics->getAllRobots();
 
     for(int i = 0; i < physics->getNumTeams();i++){
@@ -95,8 +99,10 @@ void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTea
             RobotStrategy* robotStrategy = new RobotStrategy(0);
             robotStrategiesTeam.push_back(robotStrategy);
         }
-        gameState->robotStrategiesTeam = robotStrategiesTeam;
-        gameState->robotStrategiesAdv = robotStrategiesTeam;
+        if(i == 0)
+            gameState->robotStrategiesTeam = robotStrategiesTeam;
+        else
+            gameState->robotStrategiesAdv = robotStrategiesTeam;
     }
 
     thread_physics = new thread(bind(&Simulator::runPhysics, this));
@@ -163,7 +169,7 @@ void Simulator::runReceiveTeam2(){
 
         situation_team2 = global_commands_team_2.situation();
         for(int i = 0 ; i < global_commands_team_2.robot_commands_size() ; i++){
-            commands.at(i+3) = Command((float)global_commands_team_2.robot_commands(i).left_vel()+0.001, (float)global_commands_team_2.robot_commands(i).right_vel()+0.001);
+            commands.at(i+numRobotsTeam) = Command((float)global_commands_team_2.robot_commands(i).left_vel()+0.001, (float)global_commands_team_2.robot_commands(i).right_vel()+0.001);
         }
 
         if(global_commands_team_2.has_name()){
@@ -210,19 +216,19 @@ void Simulator::runSender(){
     ball_s->mutable_k_v_pose()->set_y(0);
 
     vector<RobotPhysics*> listRobots = physics->getAllRobots();
-    for(int i = 0 ; i < 3 ; i++){
+    for(int i = 0 ; i < numRobotsTeam ; i++){
         vss_state::Robot_State *robot_s = global_state.add_robots_blue();
-        btVector3 posRobot = getRobotPosition(listRobots.at(i+3));
-        btVector3 velRobot = getRobotVelocity(listRobots.at(i+3));
+        btVector3 posRobot = getRobotPosition(listRobots.at(i+numRobotsTeam));
+        btVector3 velRobot = getRobotVelocity(listRobots.at(i+numRobotsTeam));
 
         robot_s->mutable_pose()->set_x(posRobot.getX());
         robot_s->mutable_pose()->set_y(posRobot.getZ());
-        float rads = atan2(getRobotOrientation(listRobots.at(i+3)).getZ(),getRobotOrientation(listRobots.at(i+3)).getX());
+        float rads = atan2(getRobotOrientation(listRobots.at(i+numRobotsTeam)).getZ(),getRobotOrientation(listRobots.at(i+numRobotsTeam)).getX());
         robot_s->mutable_pose()->set_yaw(rads);
 
         robot_s->mutable_v_pose()->set_x(velRobot.getX());
         robot_s->mutable_v_pose()->set_y(velRobot.getZ());
-        robot_s->mutable_v_pose()->set_yaw(getRobotAngVelocity(listRobots.at(i+3)).getY());
+        robot_s->mutable_v_pose()->set_yaw(getRobotAngVelocity(listRobots.at(i+numRobotsTeam)).getY());
 
         robot_s->mutable_k_pose()->set_x(0);
         robot_s->mutable_k_pose()->set_y(0);
@@ -233,7 +239,7 @@ void Simulator::runSender(){
         robot_s->mutable_k_v_pose()->set_yaw(0);
     }
 
-    for(int i = 0 ; i < 3 ; i++){
+    for(int i = 0 ; i < numRobotsTeam ; i++){
         vss_state::Robot_State *robot_s = global_state.add_robots_yellow();
         btVector3 posRobot = getRobotPosition(listRobots.at(i));
         btVector3 velRobot = getRobotVelocity(listRobots.at(i));
@@ -425,6 +431,8 @@ void Simulator::runStrategies(){
                     calcRelativeWorld(gameState->robotStrategiesAdv,strategies[1]->getAttackDir());
                     calcRelativeWorld(gameState->robotStrategiesTeam,strategies[0]->getAttackDir());
                     strategies[1]->runStrategy(gameState->robotStrategiesAdv,gameState->robotStrategiesTeam,ballPos);
+                    //cout << gameState->robotStrategiesTeam[0]->getTargetDistance() << endl;
+                    //cout << gameState->robotStrategiesAdv[0]->getTargetDistance() << endl;
                 }
             }else{
                 cout << "You must set a strategy to run the simulator!\n" << endl;
@@ -446,11 +454,11 @@ void Simulator::runStrategies(){
                         physics->getAllRobots()[id]->updateRobot(command);
                     }
                     else{
-                        float invCommand[2] = { commands.at(id).left, commands.at(id).right };
+                        float invCommand[2];// = { commands.at(id).left, commands.at(id).right };
 
-                        //invCommand[0] = strategies[i]->getRobotStrategiesTeam()[j]->getCommand()[1];
-                        //invCommand[1] = strategies[i]->getRobotStrategiesTeam()[j]->getCommand()[0];
-
+                        invCommand[0] = strategies[i]->getRobotStrategiesTeam()[j]->getCommand()[1];
+                        invCommand[1] = strategies[i]->getRobotStrategiesTeam()[j]->getCommand()[0];
+                        
                         physics->getAllRobots()[id]->updateRobot(invCommand);
                     }
                 }

@@ -35,7 +35,7 @@ using namespace std;
 //Base classes for system
 
 //#include "btVector3.h"
-#define NUM_ROBOTS_TEAM 3;
+#define NUM_ROBOTS_TEAM 3
 #include "Sir.h"
 
 #endif
