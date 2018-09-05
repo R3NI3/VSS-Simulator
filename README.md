@@ -18,9 +18,9 @@ $ git clone --recursive https://github.com/SIRLab/VSS-Simulator.git
 Development and Use
 -------------------
 ```
+$ cd src/VSS-Interface
+$ ./protos.sh
 $ make
-$ make proto
-$ make run
 ```
 
 
