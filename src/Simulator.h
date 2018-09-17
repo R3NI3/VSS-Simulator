@@ -59,7 +59,7 @@ private:
     float timeStep;
     float handTime;
     int simTime;
-    int numRobotsTeam;
+    int numRobotsTeam1, numRobotsTeam2;
     bool runningPhysics;
     vector<Command> commands;
 
@@ -106,7 +106,7 @@ private:
 public:
 	Simulator();
 	void runSimulator(int argc, char *argv[], ModelStrategy* strategyTeam, ModelStrategy* strategyAdv,
-                      int rate, int qtd_goal, bool develop_mode, int port, bool randInit, bool simple_sim);
+                      int rate, int qtd_goal, bool develop_mode, int port, bool randInit, int team1, int team2);
 
 	void runPhysics();
 	void runStrategies();

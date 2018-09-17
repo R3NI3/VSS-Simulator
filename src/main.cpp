@@ -40,23 +40,23 @@ public:
 };
 
 bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals,
-              bool *develop_mode, int *port, bool *random, bool *simple_sim);
+              bool *develop_mode, int *port, bool *random, int *team1, int *team2);
 
 int main(int argc, char *argv[]){
     int rate = false;
     int qtd_of_goals = 10;
     bool develop_mode = false;
     bool rand_init = false;
-    bool simple_sim = false;
+    int team1, team2;
     int port;
 
-    if(argParse(argc, argv, &rate, &qtd_of_goals, &develop_mode, &port, &rand_init, &simple_sim)){
+    if(argParse(argc, argv, &rate, &qtd_of_goals, &develop_mode, &port, &rand_init, &team1, &team2)){
         Strategy *stratYellowTeam = new Strategy(); //Original strategy
         Strategy *stratBlueTeam = new Strategy(); //Strategy for tests
 
         Simulator* simulator = new Simulator();
         simulator->runSimulator(argc, argv, stratBlueTeam, stratYellowTeam, rate,
-                                qtd_of_goals, develop_mode, port, rand_init, simple_sim);
+                                qtd_of_goals, develop_mode, port, rand_init, team1, team2);
     }else{
         return -1;
     }
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]){
 }
 
 bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals,
-              bool *develop_mode, int *port, bool *random, bool *simple_sim){
+              bool *develop_mode, int *port, bool *random, int *team1, int *team2){
     namespace bpo = boost::program_options;
 
     // Declare the supported options.
@@ -74,11 +74,12 @@ bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals,
         ("help,h", "(Optional) produce help message")
         ("rate,r", bpo::value<int>()->default_value(250), "Desired command rate. Default: 250ms")
         ("fixed,f", "(Optional) rate becomes a fixed delay value")
-        ("simple,s", "(Optional) define more simple game")
+        ("team1,m", bpo::value<int>()->default_value(3), "Number of players team 1")
+        ("team2,o", bpo::value<int>()->default_value(3), "Number of players team 2")
         ("develop,d", "(Optional) turn on the develop mode. the time doesn't count.")
         ("random,a", "(Optional) start objects at random positions, good for training.")
         ("port,p", bpo::value<int>()->default_value(5555), "(Optional) specify port to connect simulator.")
-        ("qtd_of_goals,g", bpo::value<std::string>()->default_value("10"), "(Optional) specify the qtd of goals to end the game. 10 to 100");
+        ("qtd_of_goals,g", bpo::value<std::string>()->default_value("100"), "(Optional) specify the qtd of goals to end the game. 10 to 100");
     bpo::variables_map vm;
     bpo::store(bpo::parse_command_line(argc, argv, desc), vm);
     bpo::notify(vm);
@@ -99,9 +100,9 @@ bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals,
         *develop_mode = true;
     }
 
-    if (vm.count("simple")){
-        *simple_sim = true;
-    }
+    *team1 = vm["team1"].as<int>();
+
+    *team2 = vm["team2"].as<int>();
 
     if (vm.count("random")){
         *random = true;

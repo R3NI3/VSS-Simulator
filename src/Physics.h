@@ -28,7 +28,8 @@ const float SIMULATION_TIME_STEP = (1.f/60.f);
 class Physics{
 private:
 	int numTeams;
-	int numRobotsTeam;
+	int numRobotsTeam1;
+	int numRobotsTeam2;
 
 	btDynamicsWorld* world;
 	btDispatcher* dispatcher;
@@ -46,7 +47,7 @@ private:
 	btRigidBody* addGenericBody(btCollisionShape* shape,string name, Color clr, btVector3 pos, float mass, btVector3 rotation = btVector3(0,0,0));
     static bool callBackHitFunc(btManifoldPoint& cp,const btCollisionObjectWrapper* obj1,int id1,int index1,const btCollisionObjectWrapper* obj2,int id2,int index2);
 public:
-	Physics(int numTeams, bool randInit, int numRobotsTeam);
+	Physics(int numTeams, bool randInit, int numRobotsTeam1, int numRobotsTeam2);
 	~Physics();
 	void deleteWorldObj();
 

@@ -62,6 +62,8 @@ void ModelStrategy::setAttackDir(int att){
 void ModelStrategy::updateDynamics(){
     for(int i = 0; i < robotStrategiesTeam.size();i++){
         updateLocalDynamics(robotStrategiesTeam[i],strategyHistory[strategyHistory.size()-1]->getRobotStrategiesTeam()[i]);
+    }
+    for(int i = 0; i < robotStrategiesAdv.size();i++){
         updateLocalDynamics(robotStrategiesAdv[i],strategyHistory[strategyHistory.size()-1]->getRobotStrategiesAdv()[i]);
     }
 

@@ -15,9 +15,11 @@ copies or substantial portions of the Software.
 
 #include "Physics.h"
 
-Physics::Physics(int numTeams, bool randInit, int numRobotsTeam){
+Physics::Physics(int numTeams, bool randInit, int team1, int team2){
     this->numTeams = numTeams;
-    this->numRobotsTeam = numRobotsTeam;
+    this->numRobotsTeam1 = team1;
+    this->numRobotsTeam2 = team2;
+    
 
 	collisionConfig = new btDefaultCollisionConfiguration();
     dispatcher = new btCollisionDispatcher(collisionConfig);
@@ -79,32 +81,37 @@ void Physics::registBodies(bool randInit){
     if(randInit){
         posBall.push_back(btVector3(85, 0, (rand()%110)+10));
         addBall(2.5, posBall[0], 0.08);
+        //Random velocity for ball
+        setBallVelocity(btVector3((2*(rand()%100))/100.0-1, 0, (8*(rand()%100))/100.0-4));
 
-        for(int i = 0;i < numRobotsTeam;i++){
+        for(int i = 0;i < numRobotsTeam1;i++){
             x1 = (rand()%130)+20;
-            x2 = (rand()%130)+20;
             z1 = (rand()%110)+10;
-            z2 = (rand()%110)+10;
 
             btVector3 pos1 = btVector3(x1, 4, z1);
-            btVector3 pos2 = btVector3(x2, 4, z2);
 
-                while (!(check_dist(posTeam1, pos1) && check_dist(posTeam2, pos1) && check_dist(posBall, pos1))){
-                    x1 = (rand()%130)+20;
-                    z1 = (rand()%110)+10;
-                    pos1 = btVector3(x1, 4, z1);
-                }
-                posTeam1.push_back(pos1);
-                while (!(check_dist(posTeam1, pos2) && check_dist(posTeam2, pos2) && check_dist(posBall, pos2))){
-                    x2 = (rand()%130)+20;
-                    z2 = (rand()%110)+10;
-                    pos2 = btVector3(x2, 4, z2);
-                }
-                posTeam2.push_back(pos2);
+            while (!(check_dist(posTeam1, pos1) && check_dist(posTeam2, pos1) && check_dist(posBall, pos1))){
+                x1 = (rand()%130)+20;
+                z1 = (rand()%110)+10;
+                pos1 = btVector3(x1, 4, z1);
+            }
+            posTeam1.push_back(pos1);
 
         }
-		  //Random velocity for ball
-		  setBallVelocity(btVector3((2*(rand()%100))/100.0-1, 0, (8*(rand()%100))/100.0-4));
+        for(int i = 0;i < numRobotsTeam2;i++){
+            x2 = (rand()%130)+20;
+            z2 = (rand()%110)+10;
+
+            btVector3 pos2 = btVector3(x2, 4, z2);
+
+            while (!(check_dist(posTeam1, pos2) && check_dist(posTeam2, pos2) && check_dist(posBall, pos2))){
+                x2 = (rand()%130)+20;
+                z2 = (rand()%110)+10;
+                pos2 = btVector3(x2, 4, z2);
+            }
+            posTeam2.push_back(pos2);
+
+        }
     } else {
         addBall(2.5, btVector3(85, 0, 65), 0.08); //center
         posTeam1 = vector <btVector3> {btVector3(25,4,SIZE_DEPTH- 55),btVector3(35,4,30),btVector3(55,4,45)};
@@ -113,15 +120,15 @@ void Physics::registBodies(bool randInit){
 
     //Create robots here
     //Team 1
-    for(int i = 0;i < numRobotsTeam;i++){
+    for(int i = 0;i < numRobotsTeam1;i++){
         if(numTeams >= 1){
             addRobot(Color(0.3,0.3,0.3),posTeam1[i],btVector3(0,90,0),8,0.25,clrPlayers[i],clrTeams[0], i);
         }
     }
 
-    for(int i = 0;i < numRobotsTeam;i++){
+    for(int i = 0;i < numRobotsTeam2;i++){
         if(numTeams == 2){
-            addRobot(Color(0.3,0.3,0.3),posTeam2[i],btVector3(0,-100,0),8,0.25,clrPlayers[i],clrTeams[1], numRobotsTeam+i);
+            addRobot(Color(0.3,0.3,0.3),posTeam2[i],btVector3(0,-100,0),8,0.25,clrPlayers[i],clrTeams[1], numRobotsTeam1+i);
         }
     }
     // PAREDE DE CIMA
@@ -316,12 +323,25 @@ void Physics::setBallVelocity(btVector3 newVel){
 }
 
 void Physics::setRobotsPosition(vector<btVector3> new_poses){
-    for(int i=0;i<genRobots.size();i++){
+    for(int i=0; i<numRobotsTeam1; i++){
         btTransform t;
         genRobots[i]->getRigidBody()->getMotionState()->getWorldTransform(t);
 
         t.setIdentity();
         t.setOrigin(new_poses[i]);
+        
+        btMotionState* motion = new btDefaultMotionState(t);
+        
+        genRobots[i]->getRigidBody()->setMotionState(motion);
+        genRobots[i]->getRigidBody()->setLinearVelocity(btVector3(0,0,0));
+        genRobots[i]->getRigidBody()->setAngularVelocity(btVector3(0,0,0));
+    }
+    for(int i=numRobotsTeam1, j=0; i<(numRobotsTeam1 + numRobotsTeam2); i++, j++){
+        btTransform t;
+        genRobots[i]->getRigidBody()->getMotionState()->getWorldTransform(t);
+
+        t.setIdentity();
+        t.setOrigin(new_poses[3+j]);
         
         btMotionState* motion = new btDefaultMotionState(t);
         
