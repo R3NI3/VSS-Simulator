@@ -39,7 +39,7 @@ public:
     }
 };
 
-bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, bool *develop_mode, int *port, bool *random);
+bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, bool *develop_mode, int *port, bool *random, int *iaMode);
 
 int main(int argc, char *argv[]){
     int rate = false;
@@ -47,13 +47,14 @@ int main(int argc, char *argv[]){
     bool develop_mode = false;
     bool rand_init = false;
     int port;
+	 int iaMode;
 
-    if(argParse(argc, argv, &rate, &qtd_of_goals, &develop_mode, &port, &rand_init)){
+    if(argParse(argc, argv, &rate, &qtd_of_goals, &develop_mode, &port, &rand_init, &iaMode)){
         Strategy *stratYellowTeam = new Strategy(); //Original strategy
         Strategy *stratBlueTeam = new Strategy(); //Strategy for tests
 
         Simulator* simulator = new Simulator();
-        simulator->runSimulator(argc, argv, stratBlueTeam, stratYellowTeam, rate, qtd_of_goals, develop_mode, port, rand_init);
+        simulator->runSimulator(argc, argv, stratBlueTeam, stratYellowTeam, rate, qtd_of_goals, develop_mode, port, rand_init, iaMode);
     }else{
         return -1;
     }
@@ -61,14 +62,15 @@ int main(int argc, char *argv[]){
 	return 0;
 }
 
-bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, bool *develop_mode, int *port, bool *random){
+bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, bool *develop_mode, int *port, bool *random, int *iaMode){
     namespace bpo = boost::program_options;
 
     // Declare the supported options.
     bpo::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "(Optional) produce help message")
-        ("rate,r", bpo::value<int>()->default_value(250), "Desired command rate. Default: 250ms")
+        ("ia,i", bpo::value<int>()->default_value(1), "IA mode: 0 - disabled, 1 - enable blue")
+		  ("rate,r", bpo::value<int>()->default_value(250), "Desired command rate. Default: 250ms")
         ("fixed,f", "(Optional) rate becomes a fixed delay value")
         ("develop,d", "(Optional) turn on the develop mode. the time doesn't count.")
         ("random,a", "(Optional) start objects at random positions, good for training.")
@@ -83,6 +85,11 @@ bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, bool *develop
         return false;
     }
 
+	 if (vm.count("ia")){
+		  *iaMode = vm["ia"].as<int>();
+         std::cout << "IA Mode:" << *iaMode << std::endl;
+	 }
+
     if (vm.count("fixed")){
         *rate = -vm["rate"].as<int>();
          std::cout << "fixed rate" << std::endl;
@@ -96,6 +103,7 @@ bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, bool *develop
 
     if (vm.count("random")){
         *random = true;
+		  std::cout << "Random positions mode" << std::endl;
     }
 
     stringstream ss;

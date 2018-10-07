@@ -47,14 +47,17 @@ Simulator::Simulator(){
 }
 
 void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTeam, ModelStrategy *stratYellowTeam, 
-                             int rate, int qtd_of_goals, bool develop_mode, int port, bool randInit){
+                             int rate, int qtd_of_goals, bool develop_mode, int port, bool randInit, int iaMode){
     this->fast_travel = fast_travel;
     this->qtd_of_goals = qtd_of_goals;
     this->develop_mode = develop_mode;
     this->address = "tcp://*:";
     this->port = port;
+	 this->enableBlue = false;
 
-    
+    if (iaMode == 1) 
+		this->enableBlue = true;
+
     //sim speed control
     if (rate<0) {
         desiredFreq = rate; //(negative values for a fixed simulation delay)
@@ -62,7 +65,7 @@ void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTea
     }
     else {
         delay = 9000;//1000000.f*timeStep/handTime; handTime = 1.f;
-        desiredFreq = commandFreq = rate;  
+        desiredFreq = commandFreq = rate - 33;  
     }
 
     timeStep = SIMULATION_TIME_STEP;
@@ -297,7 +300,7 @@ unsigned int Simulator::adjustDelay(int currentDelay, int currtFreq, int desired
         cerr << "Warning, delay limit reached (>100000): " << delay << endl;
     }
     if (delay<0) {
-        cerr << "Warning, delay < 0: " << delay << endl;
+        //cerr << "Warning, delay < 0: " << delay << endl;
         delay = 0;
     }
 
@@ -437,19 +440,21 @@ void Simulator::runStrategies(){
                     if(strategies[i]->getAttackDir() == 1){
                         //cout << id << endl;
                         float command[2] = { commands.at(id).left, commands.at(id).right };
-                        //if(id == 0)
-                            //cout << command[0] << " - " << command[1] << endl;
-
-                        //command[1] = strategies[i]->getRobotStrategiesTeam()[j]->getCommand()[1];
-                        //command[0] = strategies[i]->getRobotStrategiesTeam()[j]->getCommand()[0];
-
+//                        if(id != 0) {
+//                            //cout << command[0] << " - " << command[1] << endl;
+//
+//                        	command[1] = strategies[i]->getRobotStrategiesTeam()[j]->getCommand()[1];
+//                        	command[0] = strategies[i]->getRobotStrategiesTeam()[j]->getCommand()[0];
+//					   }
                         physics->getAllRobots()[id]->updateRobot(command);
                     }
                     else{
                         float invCommand[2] = { commands.at(id).left, commands.at(id).right };
 
-                        //invCommand[0] = strategies[i]->getRobotStrategiesTeam()[j]->getCommand()[1];
-                        //invCommand[1] = strategies[i]->getRobotStrategiesTeam()[j]->getCommand()[0];
+								if (this->enableBlue) {
+		                     invCommand[0] = strategies[i]->getRobotStrategiesTeam()[j]->getCommand()[1];
+		                     invCommand[1] = strategies[i]->getRobotStrategiesTeam()[j]->getCommand()[0];
+								}
 
                         physics->getAllRobots()[id]->updateRobot(invCommand);
                     }

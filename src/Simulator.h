@@ -53,6 +53,7 @@ private:
     bool has_new_name_team_2;
     int port;
     string address;
+	 bool enableBlue;
 
     Report report;
     bool finish_match;
@@ -105,7 +106,7 @@ private:
 
 public:
 	Simulator();
-	void runSimulator(int argc, char *argv[], ModelStrategy* strategyTeam, ModelStrategy* strategyAdv, int rate, int qtd_goal, bool develop_mode, int port, bool randInit);
+	void runSimulator(int argc, char *argv[], ModelStrategy* strategyTeam, ModelStrategy* strategyAdv, int rate, int qtd_goal, bool develop_mode, int port, bool randInit, int iaMode);
 
 	void runPhysics();
 	void runStrategies();
