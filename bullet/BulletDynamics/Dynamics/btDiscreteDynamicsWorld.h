@@ -4,8 +4,8 @@ Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it freely,
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
 subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
@@ -18,7 +18,6 @@ subject to the following restrictions:
 #define BT_DISCRETE_DYNAMICS_WORLD_H
 
 #include "btDynamicsWorld.h"
-#include "../Vehicle/btRaycastVehicle.h"
 
 class btDispatcher;
 class btOverlappingPairCache;
@@ -31,6 +30,7 @@ class btIDebugDraw;
 struct InplaceSolverIslandCallback;
 
 #include "LinearMath/btAlignedObjectArray.h"
+#include "LinearMath/btThreads.h"
 
 
 ///btDiscreteDynamicsWorld provides discrete rigid body simulation
@@ -38,7 +38,7 @@ struct InplaceSolverIslandCallback;
 ATTRIBUTE_ALIGNED16(class) btDiscreteDynamicsWorld : public btDynamicsWorld
 {
 protected:
-
+	
     btAlignedObjectArray<btTypedConstraint*>	m_sortedConstraints;
 	InplaceSolverIslandCallback* 	m_solverIslandCallback;
 
@@ -63,21 +63,23 @@ protected:
 	bool	m_applySpeculativeContactRestitution;
 
 	btAlignedObjectArray<btActionInterface*>	m_actions;
-
+	
 	int	m_profileTimings;
 
 	bool	m_latencyMotionStateInterpolation;
 
 	btAlignedObjectArray<btPersistentManifold*>	m_predictiveManifolds;
+    btSpinMutex m_predictiveManifoldsMutex;  // used to synchronize threads creating predictive contacts
 
 	virtual void	predictUnconstraintMotion(btScalar timeStep);
-
+	
+    void integrateTransformsInternal( btRigidBody** bodies, int numBodies, btScalar timeStep );  // can be called in parallel
 	virtual void	integrateTransforms(btScalar timeStep);
-
+		
 	virtual void	calculateSimulationIslands();
 
 	virtual void	solveConstraints(btContactSolverInfo& solverInfo);
-
+	
 	virtual void	updateActivationState(btScalar timeStep);
 
 	void	updateActions(btScalar timeStep);
@@ -86,7 +88,9 @@ protected:
 
 	virtual void	internalSingleStepSimulation( btScalar timeStep);
 
-	void	createPredictiveContacts(btScalar timeStep);
+    void releasePredictiveContacts();
+    void createPredictiveContactsInternal( btRigidBody** bodies, int numBodies, btScalar timeStep );  // can be called in parallel
+	virtual void	createPredictiveContacts(btScalar timeStep);
 
 	virtual void	saveKinematicState(btScalar timeStep);
 
@@ -107,6 +111,7 @@ public:
 	///if maxSubSteps > 0, it will interpolate motion between fixedTimeStep's
 	virtual int	stepSimulation( btScalar timeStep,int maxSubSteps=1, btScalar fixedTimeStep=btScalar(1.)/btScalar(60.));
 
+
 	virtual void	synchronizeMotionStates();
 
 	///this can be useful to synchronize a single rigid body -> graphics object
@@ -119,13 +124,13 @@ public:
 	virtual void	addAction(btActionInterface*);
 
 	virtual void	removeAction(btActionInterface*);
-
+	
 	btSimulationIslandManager*	getSimulationIslandManager()
 	{
 		return m_islandManager;
 	}
 
-	const btSimulationIslandManager*	getSimulationIslandManager() const
+	const btSimulationIslandManager*	getSimulationIslandManager() const 
 	{
 		return m_islandManager;
 	}
@@ -139,11 +144,11 @@ public:
 
 	virtual btVector3 getGravity () const;
 
-	virtual void	addCollisionObject(btCollisionObject* collisionObject,short int collisionFilterGroup=btBroadphaseProxy::StaticFilter,short int collisionFilterMask=btBroadphaseProxy::AllFilter ^ btBroadphaseProxy::StaticFilter);
+	virtual void	addCollisionObject(btCollisionObject* collisionObject, int collisionFilterGroup=btBroadphaseProxy::StaticFilter, int collisionFilterMask=btBroadphaseProxy::AllFilter ^ btBroadphaseProxy::StaticFilter);
 
 	virtual void	addRigidBody(btRigidBody* body);
 
-	virtual void	addRigidBody(btRigidBody* body, short group, short mask);
+	virtual void	addRigidBody(btRigidBody* body, int group, int mask);
 
 	virtual void	removeRigidBody(btRigidBody* body);
 
@@ -151,26 +156,26 @@ public:
 	virtual void	removeCollisionObject(btCollisionObject* collisionObject);
 
 
-	void	debugDrawConstraint(btTypedConstraint* constraint);
+	virtual void	debugDrawConstraint(btTypedConstraint* constraint);
 
 	virtual void	debugDrawWorld();
 
 	virtual void	setConstraintSolver(btConstraintSolver* solver);
 
 	virtual btConstraintSolver* getConstraintSolver();
-
+	
 	virtual	int		getNumConstraints() const;
 
 	virtual btTypedConstraint* getConstraint(int index)	;
 
 	virtual const btTypedConstraint* getConstraint(int index) const;
 
-
+	
 	virtual btDynamicsWorldType	getWorldType() const
 	{
 		return BT_DISCRETE_DYNAMICS_WORLD;
 	}
-
+	
 	///the forces on each rigidbody is accumulating together with gravity. clear this after each timestep.
 	virtual void	clearForces();
 
@@ -210,7 +215,7 @@ public:
 	{
 		m_applySpeculativeContactRestitution = enable;
 	}
-
+	
 	bool getApplySpeculativeContactRestitution() const
 	{
 		return m_applySpeculativeContactRestitution;

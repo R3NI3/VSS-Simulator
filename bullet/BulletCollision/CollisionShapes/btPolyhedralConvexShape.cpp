@@ -4,8 +4,8 @@ Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it freely,
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
 subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
@@ -48,7 +48,7 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 		m_polyhedron->~btConvexPolyhedron();
 		btAlignedFree(m_polyhedron);
 	}
-
+	
 	void* mem = btAlignedAlloc(sizeof(btConvexPolyhedron),16);
 	m_polyhedron = new (mem) btConvexPolyhedron;
 
@@ -59,9 +59,9 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 		btVector3& newVertex = orgVertices.expand();
 		getVertex(i,newVertex);
 	}
-
+	
 	btConvexHullComputer conv;
-
+	
 	if (shiftVerticesByMargin)
 	{
 		btAlignedObjectArray<btVector3> planeEquations;
@@ -79,11 +79,11 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 		btAlignedObjectArray<btVector3> tmpVertices;
 
 		btGeometryUtil::getVerticesFromPlaneEquations(shiftedPlaneEquations,tmpVertices);
-
+	
 		conv.compute(&tmpVertices[0].getX(), sizeof(btVector3),tmpVertices.size(),0.f,0.f);
 	} else
 	{
-
+		
 		conv.compute(&orgVertices[0].getX(), sizeof(btVector3),orgVertices.size(),0.f,0.f);
 	}
 
@@ -94,7 +94,7 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 	faceNormals.resize(numFaces);
 	btConvexHullComputer* convexUtil = &conv;
 
-
+	
 	btAlignedObjectArray<btFace>	tmpFaces;
 	tmpFaces.resize(numFaces);
 
@@ -119,7 +119,7 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 
 		do
 		{
-
+			
 			int src = edge->getSourceVertex();
 			tmpFaces[i].m_indices.push_back(src);
 			int targ = edge->getTargetVertex();
@@ -136,7 +136,7 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 
 		btScalar planeEq = 1e30f;
 
-
+		
 		if (numEdges==2)
 		{
 			faceNormals[i] = edges[0].cross(edges[1]);
@@ -199,7 +199,7 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 		{
 			//do the merge: use Graham Scan 2d convex hull
 
-			btAlignedObjectArray<GrahambtVector3> orgpoints;
+			btAlignedObjectArray<GrahamVector3> orgpoints;
 			btVector3 averageFaceNormal(0,0,0);
 
 			for (int i=0;i<coplanarFaceGroup.size();i++)
@@ -213,7 +213,7 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 				{
 					int orgIndex = face.m_indices[f];
 					btVector3 pt = m_polyhedron->m_vertices[orgIndex];
-
+					
 					bool found = false;
 
 					for (int i=0;i<orgpoints.size();i++)
@@ -226,17 +226,17 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 						}
 					}
 					if (!found)
-						orgpoints.push_back(GrahambtVector3(pt,orgIndex));
+						orgpoints.push_back(GrahamVector3(pt,orgIndex));
 				}
 			}
 
-
+			
 
 			btFace combinedFace;
 			for (int i=0;i<4;i++)
 				combinedFace.m_plane[i] = tmpFaces[coplanarFaceGroup[0]].m_plane[i];
 
-			btAlignedObjectArray<GrahambtVector3> hull;
+			btAlignedObjectArray<GrahamVector3> hull;
 
 			averageFaceNormal.normalize();
 			GrahamScanConvexHull2D(orgpoints,hull,averageFaceNormal);
@@ -244,9 +244,9 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 			for (int i=0;i<hull.size();i++)
 			{
 				combinedFace.m_indices.push_back(hull[i].m_orgIndex);
-				for(int k = 0; k < orgpoints.size(); k++)
+				for(int k = 0; k < orgpoints.size(); k++) 
 				{
-					if(orgpoints[k].m_orgIndex == hull[i].m_orgIndex)
+					if(orgpoints[k].m_orgIndex == hull[i].m_orgIndex) 
 					{
 						orgpoints[k].m_orgIndex = -1; // invalidate...
 						break;
@@ -256,7 +256,7 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 
 			// are there rejected vertices?
 			bool reject_merge = false;
-
+			
 
 
 			for(int i = 0; i < orgpoints.size(); i++) {
@@ -264,7 +264,7 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 					continue; // this is in the hull...
 				// this vertex is rejected -- is anybody else using this vertex?
 				for(int j = 0; j < tmpFaces.size(); j++) {
-
+					
 					btFace& face = tmpFaces[j];
 					// is this a face of the current coplanar group?
 					bool is_in_current_group = false;
@@ -306,12 +306,12 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 				m_polyhedron->m_faces.push_back(face);
 			}
 
-		}
+		} 
 
 
 
 	}
-
+	
 	m_polyhedron->initialize();
 
 	return true;
@@ -349,15 +349,15 @@ btVector3	btPolyhedralConvexShape::localGetSupportingVertexWithoutMargin(const b
         btVector3 temp[128];
         int inner_count = MIN(getNumVertices() - k, 128);
         for( i = 0; i < inner_count; i++ )
-            getVertex(i,temp[i]);
+            getVertex(i,temp[i]); 
         i = (int) vec.maxDot( temp, inner_count, newDot);
 		if (newDot > maxDot)
 		{
 			maxDot = newDot;
 			supVec = temp[i];
-		}
+		}        
     }
-
+	
 #endif //__SPU__
 	return supVec;
 }
@@ -380,19 +380,19 @@ void	btPolyhedralConvexShape::batchedUnitVectorGetSupportingVertexWithoutMargin(
 	for (int j=0;j<numVectors;j++)
 	{
         const btVector3& vec = vectors[j];
-
+        
         for( int k = 0; k < getNumVertices(); k += 128 )
         {
             btVector3 temp[128];
             int inner_count = MIN(getNumVertices() - k, 128);
             for( i = 0; i < inner_count; i++ )
-                getVertex(i,temp[i]);
+                getVertex(i,temp[i]); 
             i = (int) vec.maxDot( temp, inner_count, newDot);
             if (newDot > supportVerticesOut[j][3])
             {
 				supportVerticesOut[j] = temp[i];
 				supportVerticesOut[j][3] = newDot;
-            }
+            }        
         }
     }
 
@@ -450,7 +450,7 @@ void btPolyhedralConvexAabbCachingShape::getAabb(const btTransform& trans,btVect
 void	btPolyhedralConvexAabbCachingShape::recalcLocalAabb()
 {
 	m_isLocalAabbValid = true;
-
+	
 	#if 1
 	static const btVector3 _directions[] =
 	{
@@ -461,7 +461,7 @@ void	btPolyhedralConvexAabbCachingShape::recalcLocalAabb()
 		btVector3( 0., -1.,  0.),
 		btVector3( 0.,  0., -1.)
 	};
-
+	
 	btVector3 _supporting[] =
 	{
 		btVector3( 0., 0., 0.),
@@ -471,15 +471,15 @@ void	btPolyhedralConvexAabbCachingShape::recalcLocalAabb()
 		btVector3( 0., 0., 0.),
 		btVector3( 0., 0., 0.)
 	};
-
+	
 	batchedUnitVectorGetSupportingVertexWithoutMargin(_directions, _supporting, 6);
-
+	
 	for ( int i = 0; i < 3; ++i )
 	{
 		m_localAabbMax[i] = _supporting[i][i] + m_collisionMargin;
 		m_localAabbMin[i] = _supporting[i + 3][i] - m_collisionMargin;
 	}
-
+	
 	#else
 
 	for (int i=0;i<3;i++)

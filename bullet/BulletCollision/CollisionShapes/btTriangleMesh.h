@@ -4,8 +4,8 @@ Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it freely,
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
 subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
@@ -33,7 +33,7 @@ class btTriangleMesh : public btTriangleIndexVertexArray
 	btAlignedObjectArray<unsigned short int>		m_16bitIndices;
 	bool	m_use32bitIndices;
 	bool	m_use4componentVertices;
-
+	
 
 	public:
 		btScalar	m_weldingThreshold;
@@ -53,6 +53,9 @@ class btTriangleMesh : public btTriangleIndexVertexArray
 		///In general it is better to directly use btTriangleIndexVertexArray instead.
 		void	addTriangle(const btVector3& vertex0,const btVector3& vertex1,const btVector3& vertex2, bool removeDuplicateVertices=false);
 
+		///Add a triangle using its indices. Make sure the indices are pointing within the vertices array, so add the vertices first (and to be sure, avoid removal of duplicate vertices)	
+		void	addTriangleIndices(int index1, int index2, int index3 );
+	
 		int getNumTriangles() const;
 
 		virtual void	preallocateVertices(int numverts);
@@ -62,7 +65,7 @@ class btTriangleMesh : public btTriangleIndexVertexArray
 		int		findOrAddVertex(const btVector3& vertex, bool removeDuplicateVertices);
 		///addIndex is an internal method, use addTriangle instead
 		void	addIndex(int index);
-
+		
 };
 
 #endif //BT_TRIANGLE_MESH_H

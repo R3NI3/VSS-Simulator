@@ -4,8 +4,8 @@ Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it freely,
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
 subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
@@ -47,25 +47,21 @@ subject to the following restrictions:
 
 btConvex2dConvex2dAlgorithm::CreateFunc::CreateFunc(btSimplexSolverInterface*			simplexSolver, btConvexPenetrationDepthSolver* pdSolver)
 {
-	m_numPerturbationIterations = 0;
-	m_minimumPointsPerturbationThreshold = 3;
 	m_simplexSolver = simplexSolver;
 	m_pdSolver = pdSolver;
 }
 
-btConvex2dConvex2dAlgorithm::CreateFunc::~CreateFunc()
-{
+btConvex2dConvex2dAlgorithm::CreateFunc::~CreateFunc() 
+{ 
 }
 
-btConvex2dConvex2dAlgorithm::btConvex2dConvex2dAlgorithm(btPersistentManifold* mf,const btCollisionAlgorithmConstructionInfo& ci,const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap,btSimplexSolverInterface* simplexSolver, btConvexPenetrationDepthSolver* pdSolver,int numPerturbationIterations, int minimumPointsPerturbationThreshold)
+btConvex2dConvex2dAlgorithm::btConvex2dConvex2dAlgorithm(btPersistentManifold* mf,const btCollisionAlgorithmConstructionInfo& ci,const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap,btSimplexSolverInterface* simplexSolver, btConvexPenetrationDepthSolver* pdSolver,int /* numPerturbationIterations */, int /* minimumPointsPerturbationThreshold */)
 : btActivatingCollisionAlgorithm(ci,body0Wrap,body1Wrap),
 m_simplexSolver(simplexSolver),
 m_pdSolver(pdSolver),
 m_ownManifold (false),
 m_manifoldPtr(mf),
-m_lowLevelOfDetail(false),
- m_numPerturbationIterations(numPerturbationIterations),
-m_minimumPointsPerturbationThreshold(minimumPointsPerturbationThreshold)
+m_lowLevelOfDetail(false)
 {
 	(void)body0Wrap;
 	(void)body1Wrap;

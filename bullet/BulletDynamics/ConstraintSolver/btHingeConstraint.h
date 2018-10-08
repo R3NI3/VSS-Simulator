@@ -4,8 +4,8 @@ Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it freely,
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
 subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
@@ -29,7 +29,7 @@ class btRigidBody;
 
 #ifdef BT_USE_DOUBLE_PRECISION
 #define btHingeConstraintData	btHingeConstraintDoubleData2 //rename to 2 for backwards compatibility, so we can still load the 'btHingeConstraintDoubleData' version
-#define btHingeConstraintDataName	"btHingeConstraintDoubleData2"
+#define btHingeConstraintDataName	"btHingeConstraintDoubleData2" 
 #else
 #define btHingeConstraintData	btHingeConstraintFloatData
 #define btHingeConstraintDataName	"btHingeConstraintFloatData"
@@ -41,7 +41,8 @@ enum btHingeFlags
 {
 	BT_HINGE_FLAGS_CFM_STOP = 1,
 	BT_HINGE_FLAGS_ERP_STOP = 2,
-	BT_HINGE_FLAGS_CFM_NORM = 4
+	BT_HINGE_FLAGS_CFM_NORM = 4,
+	BT_HINGE_FLAGS_ERP_NORM = 8
 };
 
 
@@ -65,14 +66,14 @@ public:
 #ifdef	_BT_USE_CENTER_LIMIT_
 	btAngularLimit	m_limit;
 #else
-	btScalar	m_lowerLimit;
-	btScalar	m_upperLimit;
+	btScalar	m_lowerLimit;	
+	btScalar	m_upperLimit;	
 	btScalar	m_limitSign;
 	btScalar	m_correction;
 
-	btScalar	m_limitSoftness;
-	btScalar	m_biasFactor;
-	btScalar	m_relaxationFactor;
+	btScalar	m_limitSoftness; 
+	btScalar	m_biasFactor; 
+	btScalar	m_relaxationFactor; 
 
 	bool		m_solveLimit;
 #endif
@@ -94,18 +95,19 @@ public:
 
 	int			m_flags;
 	btScalar	m_normalCFM;
+	btScalar	m_normalERP;
 	btScalar	m_stopCFM;
 	btScalar	m_stopERP;
 
-
+	
 public:
 
 	BT_DECLARE_ALIGNED_ALLOCATOR();
-
+	
 	btHingeConstraint(btRigidBody& rbA,btRigidBody& rbB, const btVector3& pivotInA,const btVector3& pivotInB, const btVector3& axisInA,const btVector3& axisInB, bool useReferenceFrameA = false);
 
 	btHingeConstraint(btRigidBody& rbA,const btVector3& pivotInA,const btVector3& axisInA, bool useReferenceFrameA = false);
-
+	
 	btHingeConstraint(btRigidBody& rbA,btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool useReferenceFrameA = false);
 
 	btHingeConstraint(btRigidBody& rbA,const btTransform& rbAFrame, bool useReferenceFrameA = false);
@@ -123,7 +125,7 @@ public:
 
 	void	getInfo2Internal(btConstraintInfo2* info,const btTransform& transA,const btTransform& transB,const btVector3& angVelA,const btVector3& angVelB);
 	void	getInfo2InternalUsingFrameOffset(btConstraintInfo2* info,const btTransform& transA,const btTransform& transB,const btVector3& angVelA,const btVector3& angVelB);
-
+		
 
 	void	updateRHS(btScalar	timeStep);
 
@@ -136,14 +138,14 @@ public:
 		return m_rbB;
 	}
 
-	btRigidBody& getRigidBodyA()
-	{
-		return m_rbA;
-	}
+	btRigidBody& getRigidBodyA()	
+	{		
+		return m_rbA;	
+	}	
 
-	btRigidBody& getRigidBodyB()
-	{
-		return m_rbB;
+	btRigidBody& getRigidBodyB()	
+	{		
+		return m_rbB;	
 	}
 
 	btTransform& getFrameOffsetA()
@@ -157,7 +159,7 @@ public:
 	}
 
 	void setFrames(const btTransform& frameA, const btTransform& frameB);
-
+	
 	void	setAngularOnly(bool angularOnly)
 	{
 		m_angularOnly = angularOnly;
@@ -175,6 +177,7 @@ public:
 	//       maintain a given angular target.
 	void enableMotor(bool enableMotor) 	{ m_enableAngularMotor = enableMotor; }
 	void setMaxMotorImpulse(btScalar maxMotorImpulse) { m_maxMotorImpulse = maxMotorImpulse; }
+	void setMotorTargetVelocity(btScalar motorTargetVelocity) { m_motorTargetVelocity = motorTargetVelocity; }
 	void setMotorTarget(const btQuaternion& qAinB, btScalar dt); // qAinB is rotation of body A wrt body B.
 	void setMotorTarget(btScalar targetAngle, btScalar dt);
 
@@ -189,6 +192,33 @@ public:
 		m_limitSoftness =  _softness;
 		m_biasFactor = _biasFactor;
 		m_relaxationFactor = _relaxationFactor;
+#endif
+	}
+	
+	btScalar getLimitSoftness() const
+	{
+#ifdef	_BT_USE_CENTER_LIMIT_
+		return m_limit.getSoftness();
+#else
+		return m_limitSoftness;
+#endif
+	}
+
+	btScalar getLimitBiasFactor() const
+	{
+#ifdef	_BT_USE_CENTER_LIMIT_
+		return m_limit.getBiasFactor();
+#else
+		return m_biasFactor;
+#endif
+	}
+
+	btScalar getLimitRelaxationFactor() const
+	{
+#ifdef	_BT_USE_CENTER_LIMIT_
+		return m_limit.getRelaxationFactor();
+#else
+		return m_relaxationFactor;
 #endif
 	}
 
@@ -217,6 +247,14 @@ public:
 
 	}
 
+    bool hasLimit() const {
+#ifdef  _BT_USE_CENTER_LIMIT_
+        return m_limit.getHalfRange() > 0;
+#else
+        return m_lowerLimit <= m_upperLimit;
+#endif
+    }
+
 	btScalar	getLowerLimit() const
 	{
 #ifdef	_BT_USE_CENTER_LIMIT_
@@ -230,12 +268,13 @@ public:
 	{
 #ifdef	_BT_USE_CENTER_LIMIT_
 	return m_limit.getHigh();
-#else
+#else		
 	return m_upperLimit;
 #endif
 	}
 
 
+	///The getHingeAngle gives the hinge angle in range [-PI,PI]
 	btScalar getHingeAngle();
 
 	btScalar getHingeAngle(const btTransform& transA,const btTransform& transB);
@@ -243,10 +282,10 @@ public:
 	void testLimit(const btTransform& transA,const btTransform& transB);
 
 
-	const btTransform& getAFrame() const { return m_rbAFrame; };
+	const btTransform& getAFrame() const { return m_rbAFrame; };	
 	const btTransform& getBFrame() const { return m_rbBFrame; };
 
-	btTransform& getAFrame() { return m_rbAFrame; };
+	btTransform& getAFrame() { return m_rbAFrame; };	
 	btTransform& getBFrame() { return m_rbBFrame; };
 
 	inline int getSolveLimit()
@@ -267,32 +306,39 @@ public:
 #endif
 	}
 
-	inline bool getAngularOnly()
-	{
-		return m_angularOnly;
+	inline bool getAngularOnly() 
+	{ 
+		return m_angularOnly; 
 	}
-	inline bool getEnableAngularMotor()
-	{
-		return m_enableAngularMotor;
+	inline bool getEnableAngularMotor() 
+	{ 
+		return m_enableAngularMotor; 
 	}
-	inline btScalar getMotorTargetVelosity()
-	{
-		return m_motorTargetVelocity;
+	inline btScalar getMotorTargetVelocity() 
+	{ 
+		return m_motorTargetVelocity; 
 	}
-	inline btScalar getMaxMotorImpulse()
-	{
-		return m_maxMotorImpulse;
+	inline btScalar getMaxMotorImpulse() 
+	{ 
+		return m_maxMotorImpulse; 
 	}
 	// access for UseFrameOffset
 	bool getUseFrameOffset() { return m_useOffsetForConstraintFrame; }
 	void setUseFrameOffset(bool frameOffsetOnOff) { m_useOffsetForConstraintFrame = frameOffsetOnOff; }
+	// access for UseReferenceFrameA
+	bool getUseReferenceFrameA() const { return m_useReferenceFrameA; }
+	void setUseReferenceFrameA(bool useReferenceFrameA) { m_useReferenceFrameA = useReferenceFrameA; }
 
-
-	///override the default global value of a parameter (such as ERP or CFM), optionally provide the axis (0..5).
+	///override the default global value of a parameter (such as ERP or CFM), optionally provide the axis (0..5). 
 	///If no axis is provided, it uses the default axis for this constraint.
 	virtual	void	setParam(int num, btScalar value, int axis = -1);
 	///return the local value of parameter
 	virtual	btScalar getParam(int num, int axis = -1) const;
+	
+	virtual	int getFlags() const
+	{
+  	    return m_flags;
+	}
 
 	virtual	int	calculateSerializeBufferSize() const;
 
@@ -326,6 +372,43 @@ struct	btHingeConstraintDoubleData
 };
 #endif //BT_BACKWARDS_COMPATIBLE_SERIALIZATION
 
+///The getAccumulatedHingeAngle returns the accumulated hinge angle, taking rotation across the -PI/PI boundary into account
+ATTRIBUTE_ALIGNED16(class) btHingeAccumulatedAngleConstraint : public btHingeConstraint
+{
+protected:
+	btScalar	m_accumulatedAngle;
+public:
+
+	BT_DECLARE_ALIGNED_ALLOCATOR();
+	
+	btHingeAccumulatedAngleConstraint(btRigidBody& rbA,btRigidBody& rbB, const btVector3& pivotInA,const btVector3& pivotInB, const btVector3& axisInA,const btVector3& axisInB, bool useReferenceFrameA = false)
+	:btHingeConstraint(rbA,rbB,pivotInA,pivotInB, axisInA,axisInB, useReferenceFrameA )
+	{
+		m_accumulatedAngle=getHingeAngle();
+	}
+
+	btHingeAccumulatedAngleConstraint(btRigidBody& rbA,const btVector3& pivotInA,const btVector3& axisInA, bool useReferenceFrameA = false)
+	:btHingeConstraint(rbA,pivotInA,axisInA, useReferenceFrameA)
+	{
+		m_accumulatedAngle=getHingeAngle();
+	}
+	
+	btHingeAccumulatedAngleConstraint(btRigidBody& rbA,btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool useReferenceFrameA = false)
+	:btHingeConstraint(rbA,rbB, rbAFrame, rbBFrame, useReferenceFrameA )
+	{
+		m_accumulatedAngle=getHingeAngle();
+	}
+
+	btHingeAccumulatedAngleConstraint(btRigidBody& rbA,const btTransform& rbAFrame, bool useReferenceFrameA = false)
+	:btHingeConstraint(rbA,rbAFrame, useReferenceFrameA )
+	{
+		m_accumulatedAngle=getHingeAngle();
+	}
+	btScalar getAccumulatedHingeAngle();
+	void	setAccumulatedHingeAngle(btScalar accAngle);
+	virtual void getInfo1 (btConstraintInfo1* info);
+
+};
 
 struct	btHingeConstraintFloatData
 {
@@ -334,7 +417,7 @@ struct	btHingeConstraintFloatData
 	btTransformFloatData m_rbBFrame;
 	int			m_useReferenceFrameA;
 	int			m_angularOnly;
-
+	
 	int			m_enableAngularMotor;
 	float	m_motorTargetVelocity;
 	float	m_maxMotorImpulse;
@@ -404,6 +487,14 @@ SIMD_FORCE_INLINE	const char*	btHingeConstraint::serialize(void* dataBuffer, btS
 	hingeData->m_limitSoftness = float(m_limitSoftness);
 	hingeData->m_biasFactor = float(m_biasFactor);
 	hingeData->m_relaxationFactor = float(m_relaxationFactor);
+#endif
+
+	// Fill padding with zeros to appease msan.
+#ifdef BT_USE_DOUBLE_PRECISION
+	hingeData->m_padding1[0] = 0;
+	hingeData->m_padding1[1] = 0;
+	hingeData->m_padding1[2] = 0;
+	hingeData->m_padding1[3] = 0;
 #endif
 
 	return btHingeConstraintDataName;

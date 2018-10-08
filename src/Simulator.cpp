@@ -315,6 +315,7 @@ void Simulator::runPhysics(){
     arbiter.allocReport(&report);
     interface_sender.createSocketSendState(&global_state, this->address + std::to_string(port));
 
+	 updateReport();
     while(!finish_match){
         usleep(delay);
 
@@ -355,7 +356,7 @@ void Simulator::updateReport(){
                 int id = i- listRobots.size()/2;
                 report.collisions_in_high_speed_team[1][id]++;
                 //cout << "testeeeee-1" << endl;
-            }else{
+            } else{
                 report.collisions_in_high_speed_team[0][i]++;
             }
         }
@@ -364,11 +365,17 @@ void Simulator::updateReport(){
         listRobots.at(i)->body->getMotionState()->getWorldTransform(transTemp);
 
         btVector3 rbPos = transTemp.getOrigin();
+		  cout << "pos:" << rbPos.getX() << ", " << rbPos.getZ() << ", " << rbPos.getY() << endl;
         btVector3 ballPos = physics->getBallPosition();
 
         btVector3 dBallRbDist = rbPos - ballPos;
 
         btVector3 velRobot = listRobots.at(i)->body->getLinearVelocity()*timeStep;
+		  cout << "spd:" << velRobot.getX() << ", " << velRobot.getZ() << ", " << velRobot.getY() << endl;
+
+        //btVector3 rotRobot = listRobots.at(i)->body->getRotation();
+		  //cout << "spd:" << rotRobot.getX() << ", " << rotRobot.getZ() << ", " << rotRobots.getY() << endl;
+
         //cout << "traveled:\t" << velRobot.length() << endl;
         float modDist = dBallRbDist.length();
 
@@ -379,7 +386,6 @@ void Simulator::updateReport(){
             }else{
                 report.travelled_distance_team[0][i] += velRobot.length();
             }
-
 
         if(minDist > modDist){
             minDist = modDist;
@@ -409,7 +415,6 @@ void Simulator::runStrategies(){
             int id = i*numRobotsTeam + j;
             physics->getAllRobots()[id]->setTimeStep(timeStep);
         }
-
     }
 
     while(!finish_match){

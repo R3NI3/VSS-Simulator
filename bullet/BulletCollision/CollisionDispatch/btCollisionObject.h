@@ -4,8 +4,8 @@ Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it freely,
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
 subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
@@ -43,7 +43,7 @@ typedef btAlignedObjectArray<class btCollisionObject*> btCollisionObjectArray;
 #endif
 
 
-/// btCollisionObject can be used to manage collision detection objects.
+/// btCollisionObject can be used to manage collision detection objects. 
 /// btCollisionObject maintains all information that is needed for a collision detection: Shape, Transform and AABB proxy.
 /// They can be added to the btCollisionWorld.
 ATTRIBUTE_ALIGNED16(class)	btCollisionObject
@@ -56,20 +56,20 @@ protected:
 	///m_interpolationWorldTransform is used for CCD and interpolation
 	///it can be either previous or future (predicted) transform
 	btTransform	m_interpolationWorldTransform;
-	//those two are experimental: just added for bullet time effect, so you can still apply impulses (directly modifying velocities)
+	//those two are experimental: just added for bullet time effect, so you can still apply impulses (directly modifying velocities) 
 	//without destroying the continuous interpolated motion (which uses this interpolation velocities)
 	btVector3	m_interpolationLinearVelocity;
 	btVector3	m_interpolationAngularVelocity;
-
+	
 	btVector3	m_anisotropicFriction;
 	int			m_hasAnisotropicFriction;
-	btScalar	m_contactProcessingThreshold;
+	btScalar	m_contactProcessingThreshold;	
 
 	btBroadphaseProxy*		m_broadphaseHandle;
 	btCollisionShape*		m_collisionShape;
 	///m_extensionPointer is used by some internal low-level Bullet extensions.
 	void*					m_extensionPointer;
-
+	
 	///m_rootCollisionShape is temporarily used to store the original collision shape
 	///The m_collisionShape might be temporarily replaced by a child collision shape during collision detection purposes
 	///If it is NULL, the m_collisionShape is not temporarily replaced.
@@ -79,44 +79,50 @@ protected:
 
 	int				m_islandTag1;
 	int				m_companionId;
+    int             m_worldArrayIndex;  // index of object in world's collisionObjects array
 
 	mutable int				m_activationState1;
 	mutable btScalar			m_deactivationTime;
 
 	btScalar		m_friction;
 	btScalar		m_restitution;
-	btScalar		m_rollingFriction;
+	btScalar		m_rollingFriction;//torsional friction orthogonal to contact normal (useful to stop spheres rolling forever)
+    btScalar        m_spinningFriction; // torsional friction around the contact normal (useful for grasping)
+	btScalar		m_contactDamping;
+	btScalar		m_contactStiffness;
+	
+	
 
 	///m_internalType is reserved to distinguish Bullet's btCollisionObject, btRigidBody, btSoftBody, btGhostObject etc.
 	///do not assign your own m_internalType unless you write a new dynamics object class.
 	int				m_internalType;
 
 	///users can point to their objects, m_userPointer is not used by Bullet, see setUserPointer/getUserPointer
-	union
-	{
-		void*			m_userObjectPointer;
-		int	m_userIndex;
-	};
+
+	void*			m_userObjectPointer;
+
+	int				m_userIndex2;
+	
+    int	m_userIndex;
 
 	///time of impact calculation
-	btScalar		m_hitFraction;
-
+	btScalar		m_hitFraction; 
+	
 	///Swept sphere radius (0.0 by default), see btConvexConvexAlgorithm::
 	btScalar		m_ccdSweptSphereRadius;
 
 	/// Don't do continuous collision detection if the motion (in one step) is less then m_ccdMotionThreshold
 	btScalar		m_ccdMotionThreshold;
-
+	
 	/// If some object should have elaborate collision filtering by sub-classes
 	int			m_checkCollideWith;
+
+	btAlignedObjectArray<const btCollisionObject*> m_objectsWithoutCollisionCheck;
 
 	///internal update revision number. It will be increased when the object changes. This allows some subsystems to perform lazy evaluation.
 	int			m_updateRevision;
 
-	virtual bool	checkCollideWithOverride(const btCollisionObject* /* co */) const
-	{
-		return true;
-	}
+	btVector3	m_customDebugColorRGB;
 
 public:
 
@@ -130,7 +136,11 @@ public:
 		CF_CUSTOM_MATERIAL_CALLBACK = 8,//this allows per-triangle material (friction/restitution)
 		CF_CHARACTER_OBJECT = 16,
 		CF_DISABLE_VISUALIZE_OBJECT = 32, //disable debug drawing
-		CF_DISABLE_SPU_COLLISION_PROCESSING = 64//disable parallel/SPU processing
+		CF_DISABLE_SPU_COLLISION_PROCESSING = 64,//disable parallel/SPU processing
+		CF_HAS_CONTACT_STIFFNESS_DAMPING = 128,
+		CF_HAS_CUSTOM_DEBUG_RENDERING_COLOR = 256,
+		CF_HAS_FRICTION_ANCHOR = 512,
+		CF_HAS_COLLISION_SOUND_TRIGGER = 1024
 	};
 
 	enum	CollisionObjectTypes
@@ -203,7 +213,7 @@ public:
 		return (m_collisionFlags & CF_NO_CONTACT_RESPONSE)==0;
 	}
 
-
+	
 	btCollisionObject();
 
 	virtual ~btCollisionObject();
@@ -225,11 +235,38 @@ public:
 		return m_collisionShape;
 	}
 
+	void	setIgnoreCollisionCheck(const btCollisionObject* co, bool ignoreCollisionCheck)
+	{
+		if (ignoreCollisionCheck)
+		{
+			//We don't check for duplicates. Is it ok to leave that up to the user of this API?
+			//int index = m_objectsWithoutCollisionCheck.findLinearSearch(co);
+			//if (index == m_objectsWithoutCollisionCheck.size())
+			//{
+			m_objectsWithoutCollisionCheck.push_back(co);
+			//}
+		}
+		else
+		{
+			m_objectsWithoutCollisionCheck.remove(co);
+		}
+		m_checkCollideWith = m_objectsWithoutCollisionCheck.size() > 0;
+	}
+
+	virtual bool	checkCollideWithOverride(const btCollisionObject*  co) const
+	{
+		int index = m_objectsWithoutCollisionCheck.findLinearSearch(co);
+		if (index < m_objectsWithoutCollisionCheck.size())
+		{
+			return false;
+		}
+		return true;
+	}
 
 
+	
 
-
-	///Avoid using this internal API call, the extension pointer is used by some Bullet extensions.
+	///Avoid using this internal API call, the extension pointer is used by some Bullet extensions. 
 	///If you need to store your own user pointer, use 'setUserPointer/getUserPointer' instead.
 	void*		internalGetExtensionPointer() const
 	{
@@ -243,7 +280,7 @@ public:
 	}
 
 	SIMD_FORCE_INLINE	int	getActivationState() const { return m_activationState1;}
-
+	
 	void setActivationState(int newState) const;
 
 	void	setDeactivationTime(btScalar time)
@@ -292,8 +329,40 @@ public:
 	{
 		return m_rollingFriction;
 	}
-
-
+    void	setSpinningFriction(btScalar frict)
+    {
+        m_updateRevision++;
+        m_spinningFriction = frict;
+    }
+    btScalar	getSpinningFriction() const
+    {
+        return m_spinningFriction;
+    }
+    void	setContactStiffnessAndDamping(btScalar stiffness, btScalar damping)
+	{
+		m_updateRevision++;
+		m_contactStiffness = stiffness;
+		m_contactDamping = damping;
+		
+		m_collisionFlags |=CF_HAS_CONTACT_STIFFNESS_DAMPING;
+		
+        //avoid divisions by zero...
+		if (m_contactStiffness< SIMD_EPSILON)
+        {
+            m_contactStiffness = SIMD_EPSILON;
+        }
+	}
+	
+	btScalar	getContactStiffness() const
+	{
+		return m_contactStiffness;
+	}
+	
+	btScalar	getContactDamping() const
+	{
+		return m_contactDamping;
+	}
+    
 	///reserved for Bullet internal usage
 	int	getInternalType() const
 	{
@@ -391,9 +460,20 @@ public:
 		m_companionId = id;
 	}
 
-	SIMD_FORCE_INLINE btScalar			getHitFraction() const
+    SIMD_FORCE_INLINE int getWorldArrayIndex() const
+    {
+        return	m_worldArrayIndex;
+    }
+
+    // only should be called by CollisionWorld
+    void setWorldArrayIndex(int ix)
+    {
+        m_worldArrayIndex = ix;
+    }
+
+    SIMD_FORCE_INLINE btScalar			getHitFraction() const
 	{
-		return m_hitFraction;
+		return m_hitFraction; 
 	}
 
 	void	setHitFraction(btScalar hitFraction)
@@ -401,7 +481,7 @@ public:
 		m_hitFraction = hitFraction;
 	}
 
-
+	
 	SIMD_FORCE_INLINE int	getCollisionFlags() const
 	{
 		return m_collisionFlags;
@@ -411,7 +491,7 @@ public:
 	{
 		m_collisionFlags = flags;
 	}
-
+	
 	///Swept sphere radius (0.0 by default), see btConvexConvexAlgorithm::
 	btScalar			getCcdSweptSphereRadius() const
 	{
@@ -452,6 +532,12 @@ public:
 	{
 		return m_userIndex;
 	}
+	
+	int	getUserIndex2() const
+	{
+		return m_userIndex2;
+	}
+	
 	///users can point to their objects, userPointer is not used by Bullet
 	void	setUserPointer(void* userPointer)
 	{
@@ -463,12 +549,37 @@ public:
 	{
 		m_userIndex = index;
 	}
+	
+	void	setUserIndex2(int index)
+	{
+		m_userIndex2 = index;
+	}
 
 	int	getUpdateRevisionInternal() const
 	{
 		return m_updateRevision;
 	}
 
+	void	setCustomDebugColor(const btVector3& colorRGB)
+	{
+		m_customDebugColorRGB = colorRGB;
+		m_collisionFlags |= CF_HAS_CUSTOM_DEBUG_RENDERING_COLOR;
+	}
+
+	void	removeCustomDebugColor()
+	{
+		m_collisionFlags &= ~CF_HAS_CUSTOM_DEBUG_RENDERING_COLOR;
+	}
+
+	bool getCustomDebugColor(btVector3& colorRGB) const
+	{
+		bool hasCustomColor = (0!=(m_collisionFlags&CF_HAS_CUSTOM_DEBUG_RENDERING_COLOR));
+		if (hasCustomColor)
+		{
+			colorRGB = m_customDebugColorRGB;
+		}
+		return hasCustomColor;
+	}
 
 	inline bool checkCollideWith(const btCollisionObject* co) const
 	{
@@ -500,12 +611,14 @@ struct	btCollisionObjectDoubleData
 	btVector3DoubleData		m_interpolationLinearVelocity;
 	btVector3DoubleData		m_interpolationAngularVelocity;
 	btVector3DoubleData		m_anisotropicFriction;
-	double					m_contactProcessingThreshold;
+	double					m_contactProcessingThreshold;	
 	double					m_deactivationTime;
 	double					m_friction;
 	double					m_rollingFriction;
+	double                  m_contactDamping;
+	double                  m_contactStiffness;
 	double					m_restitution;
-	double					m_hitFraction;
+	double					m_hitFraction; 
 	double					m_ccdSweptSphereRadius;
 	double					m_ccdMotionThreshold;
 
@@ -533,13 +646,14 @@ struct	btCollisionObjectFloatData
 	btVector3FloatData		m_interpolationLinearVelocity;
 	btVector3FloatData		m_interpolationAngularVelocity;
 	btVector3FloatData		m_anisotropicFriction;
-	float					m_contactProcessingThreshold;
+	float					m_contactProcessingThreshold;	
 	float					m_deactivationTime;
 	float					m_friction;
 	float					m_rollingFriction;
-
+    float                   m_contactDamping;
+    float                   m_contactStiffness;
 	float					m_restitution;
-	float					m_hitFraction;
+	float					m_hitFraction; 
 	float					m_ccdSweptSphereRadius;
 	float					m_ccdMotionThreshold;
 

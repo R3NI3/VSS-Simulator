@@ -14,6 +14,7 @@ copies or substantial portions of the Software.
 */
 
 #include "Physics.h"
+#include <sstream>
 
 Physics::Physics(int numTeams, bool randInit){
     this->numTeams = numTeams;
@@ -87,19 +88,19 @@ void Physics::registBodies(bool randInit){
         z1 = (rand()%110)+10;
         z2 = (rand()%110)+10;
 
-        btVector3 pos1 = btVector3(x1, 4, z1);
-        btVector3 pos2 = btVector3(x2, 4, z2);
+        btVector3 pos1 = btVector3(x1, 5, z1);
+        btVector3 pos2 = btVector3(x2, 5, z2);
 
             while (!(check_dist(posTeam1, pos1) && check_dist(posTeam2, pos1) && check_dist(posBall, pos1))){
                 x1 = (rand()%130)+20;
                 z1 = (rand()%110)+10;
-                pos1 = btVector3(x1, 4, z1);
+                pos1 = btVector3(x1, 5, z1);
             }
             posTeam1.push_back(pos1);
             while (!(check_dist(posTeam1, pos2) && check_dist(posTeam2, pos2) && check_dist(posBall, pos2))){
                 x2 = (rand()%130)+20;
                 z2 = (rand()%110)+10;
-                pos2 = btVector3(x2, 4, z2);
+                pos2 = btVector3(x2, 5, z2);
             }
             posTeam2.push_back(pos2);
 
@@ -108,9 +109,9 @@ void Physics::registBodies(bool randInit){
 		  setBallVelocity(btVector3((2*(rand()%100))/100.0-1, 0, (8*(rand()%100))/100.0-4));
     } else {
         addBall(2.5, btVector3(85, 0, 65), 0.08); //center
-        posTeam1 = vector <btVector3> {btVector3(25,4,SIZE_DEPTH- 55),btVector3(35,4,30),btVector3(55,4,45)};
-        posTeam2 = vector <btVector3> {btVector3(SIZE_WIDTH-15,4,55),btVector3(SIZE_WIDTH-25,4,SIZE_DEPTH - SIZE_DEPTH/2.5 + 20),btVector3(SIZE_WIDTH-55,4,85)};
-    }   
+        posTeam1 = vector <btVector3> {btVector3(25,5,SIZE_DEPTH- 55),btVector3(35,5,30),btVector3(55,5,45)};
+        posTeam2 = vector <btVector3> {btVector3(SIZE_WIDTH-15,5,55),btVector3(SIZE_WIDTH-25,5,SIZE_DEPTH - SIZE_DEPTH/2.5 + 20),btVector3(SIZE_WIDTH-55,5,85)};
+    }
 
     //Create robots here
     //Team 1
@@ -165,8 +166,8 @@ void Physics::registBodies(bool randInit){
 }
 
 void Physics::resetRobotPositions(){
-    btVector3 posTeam1[] = {btVector3(15,4,SIZE_DEPTH- 55),btVector3(35,4,30),btVector3(55,4,45)};
-    btVector3 posTeam2[] = {btVector3(SIZE_WIDTH-15,4,55),btVector3(SIZE_WIDTH-25,4,SIZE_DEPTH - SIZE_DEPTH/2.5 + 20),btVector3(SIZE_WIDTH-55,4,85)};
+    btVector3 posTeam1[] = {btVector3(15,5,SIZE_DEPTH- 55),btVector3(35,5,30),btVector3(55,5,45)};
+    btVector3 posTeam2[] = {btVector3(SIZE_WIDTH-15,5,55),btVector3(SIZE_WIDTH-25,5,SIZE_DEPTH - SIZE_DEPTH/2.5 + 20),btVector3(SIZE_WIDTH-55,5,85)};
 
     /*
     btVector3 axis = rotation.normalize();
@@ -217,9 +218,9 @@ void Physics::setupBodiesProp(){
 vector<BulletObject*> Physics::getAllBtRobots(){
     vector<BulletObject*> listRobots;
     string prefix = "robot";
-    for(int i = 0; i < bodies.size();i++){
+    for(int i = 0; i < bodies.size();i++) {
         string name = bodies.at(i)->name;
-        if(!name.compare(0, prefix.size(), prefix)){
+        if(!name.compare(0, prefix.size(), prefix)) {
             listRobots.push_back(bodies.at(i));
         }
     }
@@ -309,7 +310,7 @@ void Physics::setBallVelocity(btVector3 newVel){
         if(bodies[i]->name.compare("ball") == 0){
             btTransform t;
 
-            bodies[i]->body->applyLinearVelocity(newVel);
+            bodies[i]->body->setLinearVelocity(newVel);
 
             break;
         }
@@ -337,23 +338,17 @@ void Physics::startDebug(){
 }
 
 void Physics::setDebugWorld(int debugMode){
-    vector<int> debugDrawMode;
     ((GLDebugDrawer*)world-> getDebugDrawer())->setDrawScenarioMode(true);
     switch (debugMode){
         case 0:{
-            debugDrawMode.push_back(btIDebugDraw::DBG_NoDebug);
-            world->getDebugDrawer()->setDebugMode(debugDrawMode);
+            world->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_NoDebug);
         }break;
         case 1:{
-            debugDrawMode.push_back(btIDebugDraw::DBG_DrawLocalProperties);
-            debugDrawMode.push_back(btIDebugDraw::DBG_DrawWireframe);
-            world->getDebugDrawer()->setDebugMode(debugDrawMode);
+            world->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawWireframe | btIDebugDraw::DBG_DrawFeaturesText);
             ((GLDebugDrawer*)world-> getDebugDrawer())->setDrawScenarioMode(false);
         }break;
         case 2:{
-            debugDrawMode.push_back(btIDebugDraw::DBG_DrawWireframe);
-            debugDrawMode.push_back(btIDebugDraw::DBG_DrawLocalProperties);
-            world-> getDebugDrawer()->setDebugMode(debugDrawMode);
+            world-> getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawWireframe | btIDebugDraw::DBG_DrawFeaturesText);
         }break;
     }
 }
@@ -396,7 +391,7 @@ RobotPhysics* Physics::addRobot(Color clr, btVector3 pos, btVector3 rotation,flo
 
     btTransform localTrans;
     localTrans.setIdentity();
-    localTrans.setOrigin(btVector3(0.0,4.0,0));
+    localTrans.setOrigin(btVector3(0.0,5.0,0));
 
     compound->addChildShape(localTrans,modelShape);
 
@@ -427,7 +422,7 @@ RobotPhysics* Physics::addRobot(Color clr, btVector3 pos, btVector3 rotation,flo
         world -> getDispatcher()
     );
 
-    bdRobot->setIdDebug(1);
+    //bdRobot->setIdDebug(1);
 
     stringstream st;
     st << "robot-";
@@ -443,7 +438,7 @@ RobotPhysics* Physics::addRobot(Color clr, btVector3 pos, btVector3 rotation,flo
     RobotPhysics* localRobot = new RobotPhysics(pos,0.2,bdRobot,colorPlayer,colorTeam);
     localRobot->buildRobot(world);
 
-    world-> addVehicle(localRobot-> getRaycast());
+    world->addVehicle(localRobot-> getRaycast());
 
     genRobots.push_back(localRobot);
     return localRobot;

@@ -4,8 +4,8 @@ Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it freely,
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
 subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
@@ -52,7 +52,7 @@ BT_DECLARE_ALIGNED_ALLOCATOR();
 	{
 		return 3;
 	}
-
+	
 	virtual void getEdge(int i,btVector3& pa,btVector3& pb) const
 	{
 		getVertex(i,pa);
@@ -60,13 +60,13 @@ BT_DECLARE_ALIGNED_ALLOCATOR();
 	}
 
 
-	virtual void getAabb(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax)const
+	virtual void getAabb(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax)const 
 	{
 //		btAssert(0);
 		getAabbSlow(t,aabbMin,aabbMax);
 	}
 
-	btVector3 localGetSupportingVertexWithoutMargin(const btVector3& dir)const
+	btVector3 localGetSupportingVertexWithoutMargin(const btVector3& dir)const 
 	{
         btVector3 dots = dir.dot3(m_vertices1[0], m_vertices1[1], m_vertices1[2]);
 	  	return m_vertices1[dots.maxAxis()];
@@ -153,7 +153,7 @@ BT_DECLARE_ALIGNED_ALLOCATOR();
 				if (dist < -tolerance)
 					return false;
 			}
-
+			
 			return true;
 		}
 
@@ -169,7 +169,7 @@ BT_DECLARE_ALIGNED_ALLOCATOR();
 		{
 			return 2;
 		}
-
+		
 		virtual void	getPreferredPenetrationDirection(int index, btVector3& penetrationVector) const
 		{
 			calcNormal(penetrationVector);

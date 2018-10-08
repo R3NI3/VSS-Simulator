@@ -1,11 +1,11 @@
 /*
 Bullet Continuous Collision Detection and Physics Library, http://bulletphysics.org
-Copyright (C) 2006, 2007 Sony Computer Entertainment Inc.
+Copyright (C) 2006, 2007 Sony Computer Entertainment Inc. 
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it freely,
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
 subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
@@ -20,7 +20,7 @@ subject to the following restrictions:
 
 #include "LinearMath/btVector3.h"
 #include "btTypedConstraint.h"
-#include "btGeneric6DofSpringConstraint.h"
+#include "btGeneric6DofSpring2Constraint.h"
 
 
 
@@ -29,7 +29,7 @@ subject to the following restrictions:
 // 2 rotational degrees of freedom, similar to Euler rotations around Z (axis 1) and X (axis 2)
 // 1 translational (along axis Z) with suspension spring
 
-ATTRIBUTE_ALIGNED16(class) btHinge2Constraint : public btGeneric6DofSpringConstraint
+ATTRIBUTE_ALIGNED16(class) btHinge2Constraint : public btGeneric6DofSpring2Constraint
 {
 protected:
 	btVector3	m_anchor;
@@ -37,7 +37,7 @@ protected:
 	btVector3	m_axis2;
 public:
 		BT_DECLARE_ALIGNED_ALLOCATOR();
-
+		
 	// constructor
 	// anchor, axis1 and axis2 are in world coordinate system
 	// axis1 must be orthogonal to axis2

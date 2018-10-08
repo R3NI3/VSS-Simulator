@@ -4,8 +4,8 @@ Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it freely,
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
 subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
@@ -48,7 +48,7 @@ btConvexShape::~btConvexShape()
 }
 
 
-void btConvexShape::project(const btTransform& trans, const btVector3& dir, btScalar& min, btScalar& max) const
+void btConvexShape::project(const btTransform& trans, const btVector3& dir, btScalar& min, btScalar& max, btVector3& witnesPtMin,btVector3& witnesPtMax) const
 {
 	btVector3 localAxis = dir*trans.getBasis();
 	btVector3 vtx1 = trans(localGetSupportingVertex(localAxis));
@@ -56,18 +56,22 @@ void btConvexShape::project(const btTransform& trans, const btVector3& dir, btSc
 
 	min = vtx1.dot(dir);
 	max = vtx2.dot(dir);
-
+	witnesPtMax = vtx2;
+	witnesPtMin = vtx1;
+	
 	if(min>max)
 	{
 		btScalar tmp = min;
 		min = max;
 		max = tmp;
+		witnesPtMax = vtx1;
+		witnesPtMin = vtx2;
 	}
 }
 
 
 static btVector3 convexHullSupport (const btVector3& localDirOrg, const btVector3* points, int numPoints, const btVector3& localScaling)
-{
+{	
 
 	btVector3 vec = localDirOrg * localScaling;
 
@@ -181,7 +185,7 @@ btVector3 btConvexShape::localGetSupportVertexWithoutMarginNonVirtual (const btV
 		{
 			XX = 0;
 			YY = 1;
-			ZZ = 2;
+			ZZ = 2;	
 		}
 		break;
 		case 2:
@@ -189,7 +193,7 @@ btVector3 btConvexShape::localGetSupportVertexWithoutMarginNonVirtual (const btV
 			XX = 0;
 			YY = 2;
 			ZZ = 1;
-
+			
 		}
 		break;
 		default:
@@ -206,7 +210,7 @@ btVector3 btConvexShape::localGetSupportVertexWithoutMarginNonVirtual (const btV
 		btScalar s = btSqrt(v[XX] * v[XX] + v[ZZ] * v[ZZ]);
 		if (s != btScalar(0.0))
 		{
-			d = radius / s;
+			d = radius / s;  
 			tmp[XX] = v[XX] * d;
 			tmp[YY] = v[YY] < 0.0 ? -halfHeight : halfHeight;
 			tmp[ZZ] = v[ZZ] * d;
@@ -226,14 +230,13 @@ btVector3 btConvexShape::localGetSupportVertexWithoutMarginNonVirtual (const btV
 		btScalar halfHeight = capsuleShape->getHalfHeight();
 		int capsuleUpAxis = capsuleShape->getUpAxis();
 
-		btScalar radius = capsuleShape->getRadius();
 		btVector3 supVec(0,0,0);
 
 		btScalar maxDot(btScalar(-BT_LARGE_FLOAT));
 
 		btVector3 vec = vec0;
 		btScalar lenSqr = vec.length2();
-		if (lenSqr < btScalar(0.0001))
+		if (lenSqr < SIMD_EPSILON*SIMD_EPSILON)
 		{
 			vec.setValue(1,0,0);
 		} else
@@ -247,10 +250,9 @@ btVector3 btConvexShape::localGetSupportVertexWithoutMarginNonVirtual (const btV
 			btVector3 pos(0,0,0);
 			pos[capsuleUpAxis] = halfHeight;
 
-			//vtx = pos +vec*(radius);
-			vtx = pos +vec*(radius) - vec * capsuleShape->getMarginNV();
+			vtx = pos;
 			newDot = vec.dot(vtx);
-
+			
 
 			if (newDot > maxDot)
 			{
@@ -262,8 +264,7 @@ btVector3 btConvexShape::localGetSupportVertexWithoutMarginNonVirtual (const btV
 			btVector3 pos(0,0,0);
 			pos[capsuleUpAxis] = -halfHeight;
 
-			//vtx = pos +vec*(radius);
-			vtx = pos +vec*(radius) - vec * capsuleShape->getMarginNV();
+			vtx = pos;
 			newDot = vec.dot(vtx);
 			if (newDot > maxDot)
 			{
@@ -271,7 +272,7 @@ btVector3 btConvexShape::localGetSupportVertexWithoutMarginNonVirtual (const btV
 				supVec = vtx;
 			}
 		}
-		return btVector3(supVec.getX(),supVec.getY(),supVec.getZ());
+		return btVector3(supVec.getX(),supVec.getY(),supVec.getZ());	
 	}
 	case CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE:
 	{
@@ -390,10 +391,10 @@ void btConvexShape::getAabbNonVirtual (const btTransform& t, btVector3& aabbMin,
 		btScalar margin=convexShape->getMarginNonVirtual();
 		btVector3 halfExtents = convexShape->getImplicitShapeDimensions();
 		halfExtents += btVector3(margin,margin,margin);
-		btMatrix3x3 abs_b = t.getBasis().absolute();
+		btMatrix3x3 abs_b = t.getBasis().absolute();  
 		btVector3 center = t.getOrigin();
-        btVector3 extent = halfExtents.dot3(abs_b[0], abs_b[1], abs_b[2]);
-
+        btVector3 extent = halfExtents.dot3(abs_b[0], abs_b[1], abs_b[2]);    
+        
 		aabbMin = center - extent;
 		aabbMax = center + extent;
 		break;
@@ -414,7 +415,7 @@ void btConvexShape::getAabbNonVirtual (const btTransform& t, btVector3& aabbMin,
 			vec[i] = btScalar(-1.);
 			tmp = t(localGetSupportVertexWithoutMarginNonVirtual(vec*t.getBasis()));
 			aabbMin[i] = tmp[i]-margin;
-		}
+		}	
 	}
 	break;
 	case CAPSULE_SHAPE_PROXYTYPE:
@@ -423,10 +424,9 @@ void btConvexShape::getAabbNonVirtual (const btTransform& t, btVector3& aabbMin,
 		btVector3 halfExtents(capsuleShape->getRadius(),capsuleShape->getRadius(),capsuleShape->getRadius());
 		int m_upAxis = capsuleShape->getUpAxis();
 		halfExtents[m_upAxis] = capsuleShape->getRadius() + capsuleShape->getHalfHeight();
-		halfExtents += btVector3(capsuleShape->getMarginNonVirtual(),capsuleShape->getMarginNonVirtual(),capsuleShape->getMarginNonVirtual());
-		btMatrix3x3 abs_b = t.getBasis().absolute();
+		btMatrix3x3 abs_b = t.getBasis().absolute();  
 		btVector3 center = t.getOrigin();
-        btVector3 extent = halfExtents.dot3(abs_b[0], abs_b[1], abs_b[2]);
+        btVector3 extent = halfExtents.dot3(abs_b[0], abs_b[1], abs_b[2]);    
 		aabbMin = center - extent;
 		aabbMax = center + extent;
 	}

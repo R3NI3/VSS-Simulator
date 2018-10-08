@@ -4,8 +4,8 @@ Copyright (c) 2013 Erwin Coumans  http://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it freely,
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
 subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
@@ -16,33 +16,17 @@ subject to the following restrictions:
 #ifndef BT_FIXED_CONSTRAINT_H
 #define BT_FIXED_CONSTRAINT_H
 
-#include "btTypedConstraint.h"
+#include "btGeneric6DofSpring2Constraint.h"
 
-ATTRIBUTE_ALIGNED16(class) btFixedConstraint : public btTypedConstraint
+
+ATTRIBUTE_ALIGNED16(class) btFixedConstraint : public btGeneric6DofSpring2Constraint
 {
-	btVector3 m_pivotInA;
-	btVector3 m_pivotInB;
-	btQuaternion m_relTargetAB;
 
 public:
 	btFixedConstraint(btRigidBody& rbA,btRigidBody& rbB, const btTransform& frameInA,const btTransform& frameInB);
 
+	
 	virtual ~btFixedConstraint();
-
-
-	virtual void getInfo1 (btConstraintInfo1* info);
-
-	virtual void getInfo2 (btConstraintInfo2* info);
-
-	virtual	void	setParam(int num, btScalar value, int axis = -1)
-	{
-		btAssert(0);
-	}
-	virtual	btScalar getParam(int num, int axis = -1) const
-	{
-		btAssert(0);
-		return 0.f;
-	}
 
 };
 

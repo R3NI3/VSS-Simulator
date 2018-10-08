@@ -4,13 +4,10 @@
  * Permission to use, copy, modify, distribute and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appear in all copies.
- * Erwin Coumans makes no representations about the suitability
- * of this software for any purpose.
+ * Erwin Coumans makes no representations about the suitability 
+ * of this software for any purpose.  
  * It is provided "as is" without express or implied warranty.
 */
-
-//Modified by Lucas Borsatto Simão lucasborsattosimao@hotmail.com
-
 #ifndef BT_RAYCASTVEHICLE_H
 #define BT_RAYCASTVEHICLE_H
 
@@ -21,32 +18,21 @@ class btDynamicsWorld;
 #include "LinearMath/btAlignedObjectArray.h"
 #include "btWheelInfo.h"
 #include "BulletDynamics/Dynamics/btActionInterface.h"
-#include <iostream>
-#include <sstream>
-#include "LinearMath/btStraight.h"
-#include "Sir.h"
 
-#include <GL/glut.h>
-#include <math.h>
-
-using namespace std;
-
-class btVehicleTuning;
+//class btVehicleTuning;
 
 ///rayCast vehicle, very special constraint that turn a rigidbody into a vehicle.
 class btRaycastVehicle : public btActionInterface
 {
+
 		btAlignedObjectArray<btVector3>	m_forwardWS;
 		btAlignedObjectArray<btVector3>	m_axle;
 		btAlignedObjectArray<btScalar>	m_forwardImpulse;
-
+		btAlignedObjectArray<btScalar>	m_sideImpulse;
+	
 		///backwards compatibility
 		int	m_userConstraintType;
 		int	m_userConstraintId;
-
-        //Debug Variables
-		btVector3 debugLinearVelocity[2];
-		btVector3 debugRel_pos[2];
 
 public:
 	class btVehicleTuning
@@ -72,39 +58,21 @@ public:
 		};
 private:
 
-	btScalar	m_tau;
-	btScalar	m_damping;
 	btVehicleRaycaster*	m_vehicleRaycaster;
 	btScalar		m_pitchControl;
-	btScalar	m_steeringValue;
+	btScalar	m_steeringValue; 
 	btScalar m_currentVehicleSpeedKmHour;
-	btVector3 _suspensionVel;
 
 	btRigidBody* m_chassisBody;
 
-	int m_indexLeftAxis;
+	int m_indexRightAxis;
 	int m_indexUpAxis;
 	int	m_indexForwardAxis;
 
-	float m_rayMotion;
-    btVector3 m_absCenterMassLinVel;
-    btVector3 m_absCenterMassAngVel;
-    btVector3 m_centripetalVelocity;
-
-    btVector3 m_hitedCenterMassAngVel;
-    btVector3 m_hitedCenterMassLinVel;
-
 	void defaultInit(const btVehicleTuning& tuning);
-	void calcSuspensionVelocity();
 
 public:
 
-    enum idWheels{
-        frontWheel = 0,
-        backWheel = 1,
-        leftWheel = 2,
-        rightWheel = 3,
-    };
 	//constructor to create a car from an existing rigidbody
 	btRaycastVehicle(const btVehicleTuning& tuning,btRigidBody* chassis,	btVehicleRaycaster* raycaster );
 
@@ -117,19 +85,18 @@ public:
         (void) collisionWorld;
 		updateVehicle(step);
 	}
-
+	
 
 	///btActionInterface interface
 	void	debugDraw(btIDebugDraw* debugDrawer);
-
-	void debugDrawProperties();
-
+			
 	const btTransform& getChassisWorldTransform() const;
-
-	bool rayCast(btWheelInfo& wheel);
+	
+	btScalar rayCast(btWheelInfo& wheel);
 
 	virtual void updateVehicle(btScalar step);
-
+	
+	
 	void resetSuspension();
 
 	btScalar	getSteeringValue(int wheel) const;
@@ -142,7 +109,7 @@ public:
 	const btTransform&	getWheelTransformWS( int wheelIndex ) const;
 
 	void	updateWheelTransform( int wheelIndex, bool interpolatedTransform = true );
-
+	
 //	void	setRaycastWheelInfo( int wheelIndex , bool isInContact, const btVector3& hitPoint, const btVector3& hitNormal,btScalar depth);
 
 	btWheelInfo&	addWheel( const btVector3& connectionPointCS0, const btVector3& wheelDirectionCS0,const btVector3& wheelAxleCS,btScalar suspensionRestLength,btScalar wheelRadius,const btVehicleTuning& tuning, bool isFrontWheel);
@@ -150,7 +117,7 @@ public:
 	inline int		getNumWheels() const {
 		return int (m_wheelInfo.size());
 	}
-
+	
 	btAlignedObjectArray<btWheelInfo>	m_wheelInfo;
 
 
@@ -160,25 +127,19 @@ public:
 
 	void	updateWheelTransformsWS(btWheelInfo& wheel , bool interpolatedTransform = true);
 
-
+	
 	void setBrake(btScalar brake,int wheelIndex);
 
 	void	setPitchControl(btScalar pitch)
 	{
 		m_pitchControl = pitch;
 	}
-
+	
 	void	updateSuspension(btScalar deltaTime);
 
 	virtual void	updateFriction(btScalar	timeStep);
 
-	void updateLocalComponentsHited();
 
-	void updateCollisionTransform(btScalar timeStep);
-
-	void updateTransformCentripetalForce(btScalar timeStep);
-
-	btVector3 getWorldVectorInLocalCoordinate(btVector3 target);
 
 	inline btRigidBody* getRigidBody()
 	{
@@ -190,9 +151,9 @@ public:
 		return m_chassisBody;
 	}
 
-	inline int	getLeftAxis() const
+	inline int	getRightAxis() const
 	{
-		return m_indexLeftAxis;
+		return m_indexRightAxis;
 	}
 	inline int getUpAxis() const
 	{
@@ -204,45 +165,18 @@ public:
 		return m_indexForwardAxis;
 	}
 
-
+	
 	///Worldspace forward vector
 	btVector3 getForwardVector() const
 	{
-		const btTransform& chassisTrans = getChassisWorldTransform();
+		const btTransform& chassisTrans = getChassisWorldTransform(); 
 
-		btVector3 forwardLocal (
-			  chassisTrans.getBasis()[0][m_indexForwardAxis],
-			  chassisTrans.getBasis()[1][m_indexForwardAxis],
-			  chassisTrans.getBasis()[2][m_indexForwardAxis]);
+		btVector3 forwardW ( 
+			  chassisTrans.getBasis()[0][m_indexForwardAxis], 
+			  chassisTrans.getBasis()[1][m_indexForwardAxis], 
+			  chassisTrans.getBasis()[2][m_indexForwardAxis]); 
 
-		return forwardLocal;
-	}
-
-	btVector3 getLeftVector() {
-        const btTransform& chassisTrans = getChassisWorldTransform();
-
-		btVector3 leftLocal (
-			  chassisTrans.getBasis()[0][m_indexLeftAxis],
-			  chassisTrans.getBasis()[1][m_indexLeftAxis],
-			  chassisTrans.getBasis()[2][m_indexLeftAxis]);
-
-		return leftLocal;
-	}
-
-	btVector3 getRightVector(){
-        btVector3 rightLocal = btVector3(-getLeftVector().getX(),-getLeftVector().getY(),-getLeftVector().getZ());
-        return rightLocal;
-	}
-
-	btVector3 getUpVector() {
-        const btTransform& chassisTrans = getChassisWorldTransform();
-
-		btVector3 upLocal (
-			  chassisTrans.getBasis()[0][m_indexUpAxis],
-			  chassisTrans.getBasis()[1][m_indexUpAxis],
-			  chassisTrans.getBasis()[2][m_indexUpAxis]);
-
-		return upLocal;
+		return forwardW;
 	}
 
 	///Velocity of vehicle (positive if velocity vector has same direction as foward vector)
@@ -251,14 +185,9 @@ public:
 		return m_currentVehicleSpeedKmHour;
 	}
 
-	btVector3    getLinearVelocityXZ(){
-        btVector3 vecLinearVelocityXZ = btVector3(m_absCenterMassLinVel.getX(),0,m_absCenterMassLinVel.getZ());
-        return vecLinearVelocityXZ;
-	}
-
-	virtual void	setCoordinateSystem(int leftIndex,int upIndex,int forwardIndex)
+	virtual void	setCoordinateSystem(int rightIndex,int upIndex,int forwardIndex)
 	{
-		m_indexLeftAxis = leftIndex;
+		m_indexRightAxis = rightIndex;
 		m_indexUpAxis = upIndex;
 		m_indexForwardAxis = forwardIndex;
 	}

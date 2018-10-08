@@ -14,6 +14,7 @@ copies or substantial portions of the Software.
 */
 
 #include "Strategy.h"
+#include "LinearMath/btStraight.h"
 
 Strategy::Strategy(){
     areaTarget = 10.f*SIMULATOR_TO_VSS;

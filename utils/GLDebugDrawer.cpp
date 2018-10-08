@@ -22,13 +22,12 @@ copies or substantial portions of the Software.
 GLDebugDrawer::GLDebugDrawer()
 :drawScenario(true)
 {
-    m_debugMode.push_back(btIDebugDraw::DBG_NoDebug);
+    m_debugMode = btIDebugDraw::DBG_NoDebug;
 
 }
 
 GLDebugDrawer::~GLDebugDrawer()
 {
-    m_debugMode.clear();
 }
 
 void	GLDebugDrawer::drawLine(const btVector3& from,const btVector3& to,const btVector3& fromColor, const btVector3& toColor)
@@ -99,17 +98,12 @@ void	GLDebugDrawer::drawTriangle(const btVector3& a,const btVector3& b,const btV
 	}
 }
 
-void	GLDebugDrawer::setDebugMode(vector<int> debugMode)
+void	GLDebugDrawer::setDebugMode(int debugMode)
 {
-    m_debugMode.clear();
-    int lenghtDebug = (debugMode.size());
-
-	for(int i = 0; i < lenghtDebug; i++){
-        m_debugMode.push_back(debugMode[i]);
-	}
+    m_debugMode = debugMode;
 }
 
-vector<int> GLDebugDrawer::getDebugMode() const{
+int GLDebugDrawer::getDebugMode() const{
         return m_debugMode;
 }
 

@@ -4,8 +4,8 @@ Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it freely,
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
 subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
@@ -29,12 +29,13 @@ ATTRIBUTE_ALIGNED16(class) btCollisionShape
 protected:
 	int m_shapeType;
 	void* m_userPointer;
+	int m_userIndex;
 
 public:
 
 	BT_DECLARE_ALIGNED_ALLOCATOR();
 
-	btCollisionShape() : m_shapeType (INVALID_SHAPE_PROXYTYPE), m_userPointer(0)
+	btCollisionShape() : m_shapeType (INVALID_SHAPE_PROXYTYPE), m_userPointer(0), m_userIndex(-1)
 	{
 	}
 
@@ -47,7 +48,7 @@ public:
 
 	virtual void	getBoundingSphere(btVector3& center,btScalar& radius) const;
 
-	///getAngularMotionDisc returns the maximus radius needed for Conservative Advancement to handle time-of-impact with rotations.
+	///getAngularMotionDisc returns the maximum radius needed for Conservative Advancement to handle time-of-impact with rotations.
 	virtual btScalar	getAngularMotionDisc() const;
 
 	virtual btScalar	getContactBreakingThreshold(btScalar defaultContactThresholdFactor) const;
@@ -107,7 +108,7 @@ public:
 	virtual const char*	getName()const =0 ;
 #endif //__SPU__
 
-
+	
 	int		getShapeType() const { return m_shapeType; }
 
 	///the getAnisotropicRollingFrictionDirection can be used in combination with setAnisotropicFriction
@@ -119,7 +120,7 @@ public:
 	virtual void	setMargin(btScalar margin) = 0;
 	virtual btScalar	getMargin() const = 0;
 
-
+	
 	///optional user data pointer
 	void	setUserPointer(void*  userPtr)
 	{
@@ -130,6 +131,16 @@ public:
 	{
 		return m_userPointer;
 	}
+	void setUserIndex(int index)
+	{
+		m_userIndex = index;
+	}
+
+	int getUserIndex() const
+	{
+		return m_userIndex;
+	}
+
 
 	virtual	int	calculateSerializeBufferSize() const;
 
@@ -138,7 +149,7 @@ public:
 
 	virtual void	serializeSingleShape(btSerializer* serializer) const;
 
-};
+};	
 
 ///do not change those serialization structures, it requires an updated sBulletDNAstr/sBulletDNAstr64
 struct	btCollisionShapeData

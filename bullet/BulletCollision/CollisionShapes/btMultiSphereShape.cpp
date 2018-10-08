@@ -4,8 +4,8 @@ Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it freely,
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
 subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
@@ -34,7 +34,7 @@ btMultiSphereShape::btMultiSphereShape (const btVector3* positions,const btScala
 	{
 		m_localPositionArray[i] = positions[i];
 		m_radiArray[i] = radi[i];
-
+		
 	}
 
 	recalcLocalAabb();
@@ -75,7 +75,7 @@ btMultiSphereShape::btMultiSphereShape (const btVector3* positions,const btScala
 		int inner_count = MIN( numSpheres - k, 128 );
         for( long i = 0; i < inner_count; i++ )
         {
-            temp[i] = (*pos) +vec*m_localScaling*(*rad) - vec * getMargin();
+            temp[i] = (*pos)*m_localScaling +vec*m_localScaling*(*rad) - vec * getMargin();
             pos++;
             rad++;
         }
@@ -113,7 +113,7 @@ btMultiSphereShape::btMultiSphereShape (const btVector3* positions,const btScala
             int inner_count = MIN( numSpheres - k, 128 );
             for( long i = 0; i < inner_count; i++ )
             {
-                temp[i] = (*pos) +vec*m_localScaling*(*rad) - vec * getMargin();
+                temp[i] = (*pos)*m_localScaling +vec*m_localScaling*(*rad) - vec * getMargin();
                 pos++;
                 rad++;
             }
@@ -124,7 +124,7 @@ btMultiSphereShape::btMultiSphereShape (const btVector3* positions,const btScala
                 supportVerticesOut[j] = temp[i];
             }
         }
-
+        
 	}
 }
 
@@ -162,7 +162,7 @@ const char*	btMultiSphereShape::serialize(void* dataBuffer, btSerializer* serial
 
 	int numElem = m_localPositionArray.size();
 	shapeData->m_localPositionArrayPtr = numElem ? (btPositionAndRadius*)serializer->getUniquePointer((void*)&m_localPositionArray[0]):  0;
-
+	
 	shapeData->m_localPositionArraySize = numElem;
 	if (numElem)
 	{
@@ -175,6 +175,9 @@ const char*	btMultiSphereShape::serialize(void* dataBuffer, btSerializer* serial
 		}
 		serializer->finalizeChunk(chunk,"btPositionAndRadius",BT_ARRAY_CODE,(void*)&m_localPositionArray[0]);
 	}
+
+	// Fill padding with zeros to appease msan.
+	memset(shapeData->m_padding, 0, sizeof(shapeData->m_padding));
 
 	return "btMultiSphereShapeData";
 }

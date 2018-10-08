@@ -3,8 +3,8 @@ Copyright (c) 2003-2006 Gino van den Bergen / Erwin Coumans  http://continuousph
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it freely,
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
 subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
@@ -26,7 +26,7 @@ SIMD_FORCE_INLINE btVector3 btAabbSupport(const btVector3& halfExtents,const btV
 {
 	return btVector3(supportDir.x() < btScalar(0.0) ? -halfExtents.x() : halfExtents.x(),
       supportDir.y() < btScalar(0.0) ? -halfExtents.y() : halfExtents.y(),
-      supportDir.z() < btScalar(0.0) ? -halfExtents.z() : halfExtents.z());
+      supportDir.z() < btScalar(0.0) ? -halfExtents.z() : halfExtents.z()); 
 }
 
 
@@ -47,13 +47,19 @@ public:
 	#ifdef QUATERNION_DERIVATIVE
 		btQuaternion predictedOrn = curTrans.getRotation();
 		predictedOrn += (angvel * predictedOrn) * (timeStep * btScalar(0.5));
-		predictedOrn.normalize();
+		predictedOrn.safeNormalize();
 	#else
 		//Exponential map
 		//google for "Practical Parameterization of Rotations Using the Exponential Map", F. Sebastian Grassia
 
 		btVector3 axis;
-		btScalar	fAngle = angvel.length();
+		btScalar	fAngle2 = angvel.length2();
+        	btScalar    fAngle = 0;
+        	if (fAngle2>SIMD_EPSILON)
+        	{
+            		fAngle = btSqrt(fAngle2);
+        	}
+
 		//limit the angular motion
 		if (fAngle*timeStep > ANGULAR_MOTION_THRESHOLD)
 		{
@@ -70,13 +76,20 @@ public:
 			// sync(fAngle) = sin(c*fAngle)/t
 			axis   = angvel*( btSin(btScalar(0.5)*fAngle*timeStep)/fAngle );
 		}
-		btQuaternion dorn (0,axis.y(),0,btCos( fAngle*timeStep*btScalar(0.5) ));
+		btQuaternion dorn (axis.x(),axis.y(),axis.z(),btCos( fAngle*timeStep*btScalar(0.5) ));
 		btQuaternion orn0 = curTrans.getRotation();
 
 		btQuaternion predictedOrn = dorn * orn0;
-		predictedOrn.normalize();
+		predictedOrn.safeNormalize();
 	#endif
-		predictedTransform.setRotation(predictedOrn);
+		if (predictedOrn.length2()>SIMD_EPSILON)
+		{
+			predictedTransform.setRotation(predictedOrn);
+		}
+		else
+		{
+			predictedTransform.setBasis(curTrans.getBasis());
+		}
 	}
 
 	static void	calculateVelocityQuaternion(const btVector3& pos0,const btVector3& pos1,const btQuaternion& orn0,const btQuaternion& orn1,btScalar timeStep,btVector3& linVel,btVector3& angVel)
@@ -124,9 +137,9 @@ public:
 		btQuaternion dorn;
 		dmat.getRotation(dorn);
 
-		///floating point inaccuracy can lead to w component > 1..., which breaks
+		///floating point inaccuracy can lead to w component > 1..., which breaks 
 		dorn.normalize();
-
+		
 		angle = dorn.getAngle();
 		axis = btVector3(dorn.x(),dorn.y(),dorn.z());
 		axis[3] = btScalar(0.);
@@ -141,7 +154,7 @@ public:
 };
 
 
-///The btConvexSeparatingDistanceUtil can help speed up convex collision detection
+///The btConvexSeparatingDistanceUtil can help speed up convex collision detection 
 ///by conservatively updating a cached separating distance/vector instead of re-calculating the closest distance
 class	btConvexSeparatingDistanceUtil
 {
@@ -149,7 +162,7 @@ class	btConvexSeparatingDistanceUtil
 	btQuaternion	m_ornB;
 	btVector3	m_posA;
 	btVector3	m_posB;
-
+	
 	btVector3	m_separatingNormal;
 
 	btScalar	m_boundingRadiusA;
@@ -179,7 +192,7 @@ public:
 
 		if (m_separatingDistance>0.f)
 		{
-
+			
 
 			btVector3 linVelA,angVelA,linVelB,angVelB;
 			btTransformUtil::calculateVelocityQuaternion(m_posA,toPosA,m_ornA,toOrnA,btScalar(1.),linVelA,angVelA);
@@ -191,11 +204,11 @@ public:
 			{
 				relLinVelocLength = 0.f;
 			}
-
+	
 			btScalar	projectedMotion = maxAngularProjectedVelocity +relLinVelocLength;
 			m_separatingDistance -= projectedMotion;
 		}
-
+	
 		m_posA = toPosA;
 		m_posB = toPosB;
 		m_ornA = toOrnA;
@@ -209,7 +222,7 @@ public:
 		if (m_separatingDistance>0.f)
 		{
 			m_separatingNormal = separatingVector;
-
+			
 			const btVector3& toPosA = transA.getOrigin();
 			const btVector3& toPosB = transB.getOrigin();
 			btQuaternion toOrnA = transA.getRotation();

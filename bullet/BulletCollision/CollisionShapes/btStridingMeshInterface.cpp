@@ -4,8 +4,8 @@ Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it freely,
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
 subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
@@ -263,7 +263,7 @@ const char*	btStridingMeshInterface::serialize(void* dataBuffer, btSerializer* s
 			case PHY_INTEGER:
 				{
 					int numindices = numtriangles*3;
-
+				
 					if (numindices)
 					{
 						btChunk* chunk = serializer->allocate(sizeof(btIntIndexData),numindices);
@@ -293,6 +293,9 @@ const char*	btStridingMeshInterface::serialize(void* dataBuffer, btSerializer* s
 							tmpIndices[gfxindex].m_values[0] = tri_indices[0];
 							tmpIndices[gfxindex].m_values[1] = tri_indices[1];
 							tmpIndices[gfxindex].m_values[2] = tri_indices[2];
+							// Fill padding with zeros to appease msan.
+							tmpIndices[gfxindex].m_pad[0] = 0;
+							tmpIndices[gfxindex].m_pad[1] = 0;
 						}
 						serializer->finalizeChunk(chunk,"btShortIntIndexTripletData",BT_ARRAY_CODE,(void*)chunk->m_oldPtr);
 					}
@@ -311,6 +314,8 @@ const char*	btStridingMeshInterface::serialize(void* dataBuffer, btSerializer* s
 							tmpIndices[gfxindex].m_values[0] = tri_indices[0];
 							tmpIndices[gfxindex].m_values[1] = tri_indices[1];
 							tmpIndices[gfxindex].m_values[2] = tri_indices[2];
+							// Fill padding with zeros to appease msan.
+							tmpIndices[gfxindex].m_pad = 0;
 						}
 						serializer->finalizeChunk(chunk,"btCharIndexTripletData",BT_ARRAY_CODE,(void*)chunk->m_oldPtr);
 					}
@@ -375,6 +380,8 @@ const char*	btStridingMeshInterface::serialize(void* dataBuffer, btSerializer* s
 		serializer->finalizeChunk(chunk,"btMeshPartData",BT_ARRAY_CODE,chunk->m_oldPtr);
 	}
 
+	// Fill padding with zeros to appease msan.
+	memset(trimeshData->m_padding, 0, sizeof(trimeshData->m_padding));
 
 	m_scaling.serializeFloat(trimeshData->m_scaling);
 	return "btStridingMeshInterfaceData";

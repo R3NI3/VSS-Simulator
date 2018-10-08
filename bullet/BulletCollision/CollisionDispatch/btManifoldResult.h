@@ -4,8 +4,8 @@ Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it freely,
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
 subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
@@ -48,18 +48,20 @@ protected:
 	int m_partId1;
 	int m_index0;
 	int m_index1;
-
-
+	
+	
 public:
 
 	btManifoldResult()
-#ifdef DEBUG_PART_INDEX
 		:
+#ifdef DEBUG_PART_INDEX
+		
 	m_partId0(-1),
 	m_partId1(-1),
 	m_index0(-1),
 	m_index1(-1)
 #endif //DEBUG_PART_INDEX
+		m_closestPointDistanceThreshold(0)
 	{
 	}
 
@@ -142,9 +144,15 @@ public:
 		return m_body1Wrap->getCollisionObject();
 	}
 
+	btScalar	m_closestPointDistanceThreshold;
+
 	/// in the future we can let the user override the methods to combine restitution and friction
 	static btScalar	calculateCombinedRestitution(const btCollisionObject* body0,const btCollisionObject* body1);
 	static btScalar	calculateCombinedFriction(const btCollisionObject* body0,const btCollisionObject* body1);
+	static btScalar calculateCombinedRollingFriction(const btCollisionObject* body0,const btCollisionObject* body1);
+    static btScalar calculateCombinedSpinningFriction(const btCollisionObject* body0,const btCollisionObject* body1);
+    static btScalar calculateCombinedContactDamping(const btCollisionObject* body0,const btCollisionObject* body1);
+	static btScalar calculateCombinedContactStiffness(const btCollisionObject* body0,const btCollisionObject* body1);
 };
 
 #endif //BT_MANIFOLD_RESULT_H
