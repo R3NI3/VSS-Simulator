@@ -14,6 +14,7 @@ copies or substantial portions of the Software.
 */
 
 #include "Physics.h"
+#include <sstream>
 
 Physics::Physics(int numTeams, bool randInit){
     this->numTeams = numTeams;
@@ -337,23 +338,17 @@ void Physics::startDebug(){
 }
 
 void Physics::setDebugWorld(int debugMode){
-    vector<int> debugDrawMode;
     ((GLDebugDrawer*)world-> getDebugDrawer())->setDrawScenarioMode(true);
     switch (debugMode){
         case 0:{
-            debugDrawMode.push_back(btIDebugDraw::DBG_NoDebug);
-            world->getDebugDrawer()->setDebugMode(debugDrawMode);
+            world->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_NoDebug);
         }break;
         case 1:{
-            debugDrawMode.push_back(btIDebugDraw::DBG_DrawLocalProperties);
-            debugDrawMode.push_back(btIDebugDraw::DBG_DrawWireframe);
-            world->getDebugDrawer()->setDebugMode(debugDrawMode);
+            world->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
             ((GLDebugDrawer*)world-> getDebugDrawer())->setDrawScenarioMode(false);
         }break;
         case 2:{
-            debugDrawMode.push_back(btIDebugDraw::DBG_DrawWireframe);
-            debugDrawMode.push_back(btIDebugDraw::DBG_DrawLocalProperties);
-            world-> getDebugDrawer()->setDebugMode(debugDrawMode);
+            world-> getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
         }break;
     }
 }

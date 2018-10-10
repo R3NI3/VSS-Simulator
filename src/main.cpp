@@ -69,7 +69,7 @@ bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, bool *develop
     bpo::options_description desc("Allowed options");
     desc.add_options()
         ("help,h", "(Optional) produce help message")
-        ("ia,i", bpo::value<int>()->default_value(1), "IA mode: 0 - disabled, 1 - enable blue")
+        ("ia,i", bpo::value<int>()->default_value(0), "IA mode: 0 - disabled, 1 - enable blue")
 		  ("rate,r", bpo::value<int>()->default_value(250), "Desired command rate. Default: 250ms")
         ("fixed,f", "(Optional) rate becomes a fixed delay value")
         ("develop,d", "(Optional) turn on the develop mode. the time doesn't count.")

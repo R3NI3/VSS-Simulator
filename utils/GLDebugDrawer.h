@@ -24,7 +24,7 @@ using namespace std;
 
 class GLDebugDrawer : public btIDebugDraw
 {
-	vector<int> m_debugMode;
+	int m_debugMode;
 	bool drawScenario;
 
 public:
@@ -46,9 +46,9 @@ public:
 
 	virtual void	draw3dText(const btVector3& location,const char* textString);
 
-	virtual void	setDebugMode(vector<int> debugMode);
+	virtual void	setDebugMode(int debugMode);
 
-	virtual vector<int>	getDebugMode() const;
+	virtual int	getDebugMode() const;
 
 	virtual void    setDrawScenarioMode(bool drawScenario);
 

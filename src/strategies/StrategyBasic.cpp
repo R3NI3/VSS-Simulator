@@ -14,6 +14,7 @@ copies or substantial portions of the Software.
 */
 
 #include "StrategyBasic.h"
+#include "LinearMath/btStraight.h"
 
 StrategyBasic::StrategyBasic():framesStopped(0),framesBackward(0){
     attackDir = 1;

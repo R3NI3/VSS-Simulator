@@ -118,7 +118,7 @@ void RobotPhysics::updateRobot(float* speed){
 
     float iniWheelVel[2];
     for(int i = 2; i < raycast->getNumWheels();i++){
-        iniWheelVel[i-2] = raycast->getWheelInfo(i).m_localVelocity;
+        iniWheelVel[i-2] = 0;//TODO:raycast->getWheelInfo(i).m_localVelocity;
     }
 
     calcProportionalVelocity(iniWheelVel,endWheelVel);
