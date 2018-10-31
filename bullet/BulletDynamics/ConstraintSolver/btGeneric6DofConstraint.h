@@ -68,7 +68,7 @@ public:
     //! temp_variables
     //!@{
     btScalar m_currentLimitError;//!  How much is violated this limit
-    btScalar m_currentPosition;     //!  current value of angle 
+    btScalar m_currentPosition;     //!  current value of angle
     int m_currentLimit;//!< 0=free, 1=at lo limit, 2=at hi limit
     btScalar m_accumulatedImpulse;
     //!@}
@@ -111,14 +111,14 @@ public:
 
 
 	//! Is limited
-    bool isLimited() const
+    bool isLimited()
     {
     	if(m_loLimit > m_hiLimit) return false;
     	return true;
     }
 
 	//! Need apply correction
-    bool needApplyTorques() const
+    bool needApplyTorques()
     {
     	if(m_currentLimit == 0 && m_enableMotor == false) return false;
     	return true;
@@ -171,7 +171,7 @@ public:
     	m_limitSoftness = 0.7f;
     	m_damping = btScalar(1.0f);
     	m_restitution = btScalar(0.5f);
-		for(int i=0; i < 3; i++) 
+		for(int i=0; i < 3; i++)
 		{
 			m_enableMotor[i] = false;
 			m_targetVelocity[i] = btScalar(0.f);
@@ -192,7 +192,7 @@ public:
 		m_stopERP = other.m_stopERP;
 		m_stopCFM = other.m_stopCFM;
 
-		for(int i=0; i < 3; i++) 
+		for(int i=0; i < 3; i++)
 		{
 			m_enableMotor[i] = other.m_enableMotor[i];
 			m_targetVelocity[i] = other.m_targetVelocity[i];
@@ -207,11 +207,11 @@ public:
     - limited means upper > lower
     - limitIndex: first 3 are linear, next 3 are angular
     */
-    inline bool	isLimited(int limitIndex) const
+    inline bool	isLimited(int limitIndex)
     {
        return (m_upperLimit[limitIndex] >= m_lowerLimit[limitIndex]);
     }
-    inline bool needApplyForce(int limitIndex) const
+    inline bool needApplyForce(int limitIndex)
     {
     	if(m_currentLimit[limitIndex] == 0 && m_enableMotor[limitIndex] == false) return false;
     	return true;
@@ -316,12 +316,12 @@ protected:
 	btScalar	m_factA;
 	btScalar	m_factB;
 	bool		m_hasStaticBody;
-    
+
 	btVector3 m_AnchorPos; // point betwen pivots of bodies A and B to solve linear axes
 
     bool	m_useLinearReferenceFrameA;
 	bool	m_useOffsetForConstraintFrame;
-    
+
 	int		m_flags;
 
     //!@}
@@ -355,13 +355,13 @@ protected:
 public:
 
 	BT_DECLARE_ALIGNED_ALLOCATOR();
-	
+
 	///for backwards compatibility during the transition to 'getInfo/getInfo2'
 	bool		m_useSolveConstraintObsolete;
 
     btGeneric6DofConstraint(btRigidBody& rbA, btRigidBody& rbB, const btTransform& frameInA, const btTransform& frameInB ,bool useLinearReferenceFrameA);
     btGeneric6DofConstraint(btRigidBody& rbB, const btTransform& frameInB, bool useLinearReferenceFrameB);
-    
+
 	//! Calcs global transform of the offsets
 	/*!
 	Calcs the global transform for the joint offset for body A an B, and also calcs the agle differences between the bodies.
@@ -457,7 +457,7 @@ public:
     	m_linearLimits.m_lowerLimit = linearLower;
     }
 
-	void	getLinearLowerLimit(btVector3& linearLower) const
+	void	getLinearLowerLimit(btVector3& linearLower)
 	{
 		linearLower = m_linearLimits.m_lowerLimit;
 	}
@@ -467,20 +467,20 @@ public:
 		m_linearLimits.m_upperLimit = linearUpper;
 	}
 
-	void	getLinearUpperLimit(btVector3& linearUpper) const
+	void	getLinearUpperLimit(btVector3& linearUpper)
 	{
 		linearUpper = m_linearLimits.m_upperLimit;
 	}
 
     void	setAngularLowerLimit(const btVector3& angularLower)
     {
-		for(int i = 0; i < 3; i++) 
+		for(int i = 0; i < 3; i++)
 			m_angularLimits[i].m_loLimit = btNormalizeAngle(angularLower[i]);
     }
 
-	void	getAngularLowerLimit(btVector3& angularLower) const
+	void	getAngularLowerLimit(btVector3& angularLower)
 	{
-		for(int i = 0; i < 3; i++) 
+		for(int i = 0; i < 3; i++)
 			angularLower[i] = m_angularLimits[i].m_loLimit;
 	}
 
@@ -490,7 +490,7 @@ public:
 			m_angularLimits[i].m_hiLimit = btNormalizeAngle(angularUpper[i]);
     }
 
-	void	getAngularUpperLimit(btVector3& angularUpper) const
+	void	getAngularUpperLimit(btVector3& angularUpper)
 	{
 		for(int i = 0; i < 3; i++)
 			angularUpper[i] = m_angularLimits[i].m_hiLimit;
@@ -532,7 +532,7 @@ public:
     - limited means upper > lower
     - limitIndex: first 3 are linear, next 3 are angular
     */
-    bool	isLimited(int limitIndex) const
+    bool	isLimited(int limitIndex)
     {
     	if(limitIndex<3)
     	{
@@ -549,13 +549,10 @@ public:
 								btConstraintInfo2 *info, int row, btVector3& ax1, int rotational, int rotAllowed = false);
 
 	// access for UseFrameOffset
-	bool getUseFrameOffset() const { return m_useOffsetForConstraintFrame; }
+	bool getUseFrameOffset() { return m_useOffsetForConstraintFrame; }
 	void setUseFrameOffset(bool frameOffsetOnOff) { m_useOffsetForConstraintFrame = frameOffsetOnOff; }
-	
-	bool getUseLinearReferenceFrameA() const { return m_useLinearReferenceFrameA; }
-	void setUseLinearReferenceFrameA(bool linearReferenceFrameA) { m_useLinearReferenceFrameA = linearReferenceFrameA; }
 
-	///override the default global value of a parameter (such as ERP or CFM), optionally provide the axis (0..5). 
+	///override the default global value of a parameter (such as ERP or CFM), optionally provide the axis (0..5).
 	///If no axis is provided, it uses the default axis for this constraint.
 	virtual	void setParam(int num, btScalar value, int axis = -1);
 	///return the local value of parameter
@@ -563,17 +560,13 @@ public:
 
 	void setAxis( const btVector3& axis1, const btVector3& axis2);
 
-    	virtual	int getFlags() const
-    	{
-        	return m_flags;
-	}
 
 	virtual	int	calculateSerializeBufferSize() const;
 
 	///fills the dataBuffer and returns the struct name (and 0 on failure)
 	virtual	const char*	serialize(void* dataBuffer, btSerializer* serializer) const;
 
-	
+
 };
 
 
@@ -582,13 +575,13 @@ struct btGeneric6DofConstraintData
 	btTypedConstraintData	m_typeConstraintData;
 	btTransformFloatData m_rbAFrame; // constraint axii. Assumes z is hinge axis.
 	btTransformFloatData m_rbBFrame;
-	
+
 	btVector3FloatData	m_linearUpperLimit;
 	btVector3FloatData	m_linearLowerLimit;
 
 	btVector3FloatData	m_angularUpperLimit;
 	btVector3FloatData	m_angularLowerLimit;
-	
+
 	int	m_useLinearReferenceFrameA;
 	int m_useOffsetForConstraintFrame;
 };
@@ -598,13 +591,13 @@ struct btGeneric6DofConstraintDoubleData2
 	btTypedConstraintDoubleData	m_typeConstraintData;
 	btTransformDoubleData m_rbAFrame; // constraint axii. Assumes z is hinge axis.
 	btTransformDoubleData m_rbBFrame;
-	
+
 	btVector3DoubleData	m_linearUpperLimit;
 	btVector3DoubleData	m_linearLowerLimit;
 
 	btVector3DoubleData	m_angularUpperLimit;
 	btVector3DoubleData	m_angularLowerLimit;
-	
+
 	int	m_useLinearReferenceFrameA;
 	int m_useOffsetForConstraintFrame;
 };
@@ -624,7 +617,7 @@ SIMD_FORCE_INLINE	const char*	btGeneric6DofConstraint::serialize(void* dataBuffe
 	m_frameInA.serialize(dof->m_rbAFrame);
 	m_frameInB.serialize(dof->m_rbBFrame);
 
-		
+
 	int i;
 	for (i=0;i<3;i++)
 	{
@@ -633,7 +626,7 @@ SIMD_FORCE_INLINE	const char*	btGeneric6DofConstraint::serialize(void* dataBuffe
 		dof->m_linearLowerLimit.m_floats[i] = m_linearLimits.m_lowerLimit[i];
 		dof->m_linearUpperLimit.m_floats[i] = m_linearLimits.m_upperLimit[i];
 	}
-	
+
 	dof->m_useLinearReferenceFrameA = m_useLinearReferenceFrameA? 1 : 0;
 	dof->m_useOffsetForConstraintFrame = m_useOffsetForConstraintFrame ? 1 : 0;
 

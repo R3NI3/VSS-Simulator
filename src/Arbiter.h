@@ -18,6 +18,8 @@ protected:
 	int minutes;
     long int sysLastTime;
     long int simLastTime;
+    int penalty_team_1_counter;
+    int penalty_team_2_counter;
 public:
 	bool refresh;
 	Arbiter();
@@ -32,6 +34,11 @@ public:
 
 	void position_objects_after_goal_team_1();
 	void position_objects_after_goal_team_2();
+	void penalty_team_1();
+	void penalty_team_2();
+
+	int is_penalty_team_1();
+	int is_penalty_team_2();
 };
 
 #endif // _ARBITER_H_

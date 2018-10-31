@@ -17,8 +17,6 @@ subject to the following restrictions:
 #ifndef BT_COMPOUND_COMPOUND_COLLISION_ALGORITHM_H
 #define BT_COMPOUND_COMPOUND_COLLISION_ALGORITHM_H
 
-#include "btCompoundCollisionAlgorithm.h"
-
 #include "BulletCollision/CollisionDispatch/btActivatingCollisionAlgorithm.h"
 #include "BulletCollision/BroadphaseCollision/btDispatcher.h"
 #include "BulletCollision/BroadphaseCollision/btBroadphaseInterface.h"
@@ -33,13 +31,18 @@ class btDispatcher;
 class btCollisionObject;
 
 class btCollisionShape;
+typedef bool (*btShapePairCallback)(const btCollisionShape* pShape0, const btCollisionShape* pShape1);
+extern btShapePairCallback gCompoundCompoundChildShapePairCallback;
 
 /// btCompoundCompoundCollisionAlgorithm  supports collision between two btCompoundCollisionShape shapes
-class btCompoundCompoundCollisionAlgorithm  : public btCompoundCollisionAlgorithm
+class btCompoundCompoundCollisionAlgorithm  : public btActivatingCollisionAlgorithm
 {
 
 	class btHashedSimplePairCache*	m_childCollisionAlgorithmCache;
 	btSimplePairArray m_removePairs;
+
+	class btPersistentManifold*	m_sharedManifold;
+	bool					m_ownsManifold;
 
 
 	int	m_compoundShapeRevision0;//to keep track of changes, so that childAlgorithm array can be updated

@@ -51,7 +51,7 @@ public:
 	}
 
 
-	void get_plane_equation_transformed(const btTransform & trans,btVector4 &equation) const 
+	void get_plane_equation_transformed(const btTransform & trans,btVector4 &equation) const
 	{
 		equation[0] = trans.getBasis().getRow(0).dot(m_planeNormal);
 		equation[1] = trans.getBasis().getRow(1).dot(m_planeNormal);
@@ -231,15 +231,15 @@ void btGImpactCollisionAlgorithm::shape_vs_shape_collision(
 
 
 	{
-		
+
 		btCollisionAlgorithm* algor = newAlgorithm(body0Wrap,body1Wrap);
 		// post :	checkManifold is called
 
 		m_resultOut->setShapeIdentifiersA(m_part0,m_triface0);
 		m_resultOut->setShapeIdentifiersB(m_part1,m_triface1);
-		
+
 		algor->processCollision(body0Wrap,body1Wrap,*m_dispatchInfo,m_resultOut);
-		
+
 		algor->~btCollisionAlgorithm();
 		m_dispatcher->freeCollisionAlgorithm(algor);
 	}
@@ -654,7 +654,7 @@ void btGImpactCollisionAlgorithm::gimpact_vs_shape(const btCollisionObjectWrappe
 
 		btCollisionObjectWrapper ob0(body0Wrap,colshape0,body0Wrap->getCollisionObject(),body0Wrap->getWorldTransform(),m_part0,m_triface0);
 		const btCollisionObjectWrapper* prevObj0 = m_resultOut->getBody0Wrap();
-		
+
 		if (m_resultOut->getBody0Wrap()->getCollisionObject()==ob0.getCollisionObject())
 		{
 			m_resultOut->setBody0Wrap(&ob0);
@@ -666,12 +666,12 @@ void btGImpactCollisionAlgorithm::gimpact_vs_shape(const btCollisionObjectWrappe
 		//collide two shapes
 		if(swapped)
 		{
-			
+
 			shape_vs_shape_collision(body1Wrap,&ob0,shape1,colshape0);
 		}
 		else
 		{
-			
+
 			shape_vs_shape_collision(&ob0,body1Wrap,colshape0,shape1);
 		}
 		m_resultOut->setBody0Wrap(prevObj0);
@@ -697,7 +697,7 @@ void btGImpactCollisionAlgorithm::gimpact_vs_compoundshape(const btCollisionObje
 		btTransform childtrans1 = orgtrans1*shape1->getChildTransform(i);
 
 		btCollisionObjectWrapper ob1(body1Wrap,colshape1,body1Wrap->getCollisionObject(),childtrans1,-1,i);
-		
+
 		const btCollisionObjectWrapper* tmp = 0;
 		if (m_resultOut->getBody0Wrap()->getCollisionObject()==ob1.getCollisionObject())
 		{
@@ -820,7 +820,7 @@ public:
 			tmp = algorithm->internalGetResultOut()->getBody1Wrap();
 			algorithm->internalGetResultOut()->setBody1Wrap(&ob1Wrap);
 		}
-		
+
 		algorithm->gimpact_vs_shape(
 							body0Wrap,&ob1Wrap,gimpactshape0,&tri1,swapped);
 

@@ -25,13 +25,11 @@ TODO:
 #ifndef BT_SLIDER_CONSTRAINT_H
 #define BT_SLIDER_CONSTRAINT_H
 
-#include "LinearMath/btScalar.h"//for BT_USE_DOUBLE_PRECISION
-
 #ifdef BT_USE_DOUBLE_PRECISION
 #define btSliderConstraintData2		btSliderConstraintDoubleData
 #define btSliderConstraintDataName  "btSliderConstraintDoubleData"
 #else
-#define btSliderConstraintData2		btSliderConstraintData 
+#define btSliderConstraintData2		btSliderConstraintData
 #define btSliderConstraintDataName	"btSliderConstraintData"
 #endif //BT_USE_DOUBLE_PRECISION
 
@@ -119,7 +117,7 @@ protected:
 	btScalar m_restitutionOrthoAng;
 	btScalar m_dampingOrthoAng;
 	btScalar m_cfmOrthoAng;
-	
+
 	// for interlal use
 	bool m_solveLinLim;
 	bool m_solveAngLim;
@@ -154,17 +152,17 @@ protected:
     btScalar m_targetLinMotorVelocity;
     btScalar m_maxLinMotorForce;
     btScalar m_accumulatedLinMotorImpulse;
-	
+
 	bool	 m_poweredAngMotor;
     btScalar m_targetAngMotorVelocity;
     btScalar m_maxAngMotorForce;
     btScalar m_accumulatedAngMotorImpulse;
 
-	//------------------------    
+	//------------------------
 	void initParams();
 public:
 	BT_DECLARE_ALIGNED_ALLOCATOR();
-	
+
 	// constructors
     btSliderConstraint(btRigidBody& rbA, btRigidBody& rbB, const btTransform& frameInA, const btTransform& frameInB ,bool useLinearReferenceFrameA);
     btSliderConstraint(btRigidBody& rbB, const btTransform& frameInB, bool useLinearReferenceFrameA);
@@ -174,7 +172,7 @@ public:
     virtual void getInfo1 (btConstraintInfo1* info);
 
 	void getInfo1NonVirtual(btConstraintInfo1* info);
-	
+
 	virtual void getInfo2 (btConstraintInfo2* info);
 
 	void getInfo2NonVirtual(btConstraintInfo2* info, const btTransform& transA, const btTransform& transB,const btVector3& linVelA,const btVector3& linVelB, btScalar rbAinvMass,btScalar rbBinvMass);
@@ -249,8 +247,8 @@ public:
 
 	btScalar getLinearPos() const { return m_linPos; }
 	btScalar getAngularPos() const { return m_angPos; }
-	
-	
+
+
 
 	// access for ODE solver
 	bool getSolveLinLimit() { return m_solveLinLim; }
@@ -268,25 +266,20 @@ public:
 	bool getUseFrameOffset() { return m_useOffsetForConstraintFrame; }
 	void setUseFrameOffset(bool frameOffsetOnOff) { m_useOffsetForConstraintFrame = frameOffsetOnOff; }
 
-	void setFrames(const btTransform& frameA, const btTransform& frameB) 
-	{ 
-		m_frameInA=frameA; 
+	void setFrames(const btTransform& frameA, const btTransform& frameB)
+	{
+		m_frameInA=frameA;
 		m_frameInB=frameB;
 		calculateTransforms(m_rbA.getCenterOfMassTransform(),m_rbB.getCenterOfMassTransform());
 		buildJacobian();
-	} 
+	}
 
 
-	///override the default global value of a parameter (such as ERP or CFM), optionally provide the axis (0..5). 
+	///override the default global value of a parameter (such as ERP or CFM), optionally provide the axis (0..5).
 	///If no axis is provided, it uses the default axis for this constraint.
 	virtual	void	setParam(int num, btScalar value, int axis = -1);
 	///return the local value of parameter
 	virtual	btScalar getParam(int num, int axis = -1) const;
-	
-	virtual	int getFlags() const
-    	{
-		return m_flags;
-	}
 
 	virtual	int	calculateSerializeBufferSize() const;
 
@@ -305,7 +298,7 @@ struct btSliderConstraintData
 	btTypedConstraintData	m_typeConstraintData;
 	btTransformFloatData m_rbAFrame; // constraint axii. Assumes z is hinge axis.
 	btTransformFloatData m_rbBFrame;
-	
+
 	float	m_linearUpperLimit;
 	float	m_linearLowerLimit;
 
@@ -323,7 +316,7 @@ struct btSliderConstraintDoubleData
 	btTypedConstraintDoubleData	m_typeConstraintData;
 	btTransformDoubleData m_rbAFrame; // constraint axii. Assumes z is hinge axis.
 	btTransformDoubleData m_rbBFrame;
-	
+
 	double	m_linearUpperLimit;
 	double	m_linearLowerLimit;
 

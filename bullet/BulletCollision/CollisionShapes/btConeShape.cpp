@@ -4,8 +4,8 @@ Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose, 
-including commercial applications, and to alter it and redistribute it freely, 
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it freely,
 subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
@@ -62,7 +62,7 @@ void	btConeShape::setConeUpIndex(int upIndex)
 	default:
 		btAssert(0);
 	};
-	
+
 	m_implicitShapeDimensions[m_coneIndices[0]] = m_radius;
 	m_implicitShapeDimensions[m_coneIndices[1]] = m_height;
 	m_implicitShapeDimensions[m_coneIndices[2]] = m_radius;
@@ -70,7 +70,7 @@ void	btConeShape::setConeUpIndex(int upIndex)
 
 btVector3 btConeShape::coneLocalSupport(const btVector3& v) const
 {
-	
+
 	btScalar halfHeight = m_height * btScalar(0.5);
 
  if (v[m_coneIndices[1]] > v.length() * m_sinAngle)
@@ -127,7 +127,7 @@ btVector3	btConeShape::localGetSupportingVertex(const btVector3& vec)  const
 		if (vecnorm .length2() < (SIMD_EPSILON*SIMD_EPSILON))
 		{
 			vecnorm.setValue(btScalar(-1.),btScalar(-1.),btScalar(-1.));
-		} 
+		}
 		vecnorm.normalize();
 		supVertex+= getMargin() * vecnorm;
 	}

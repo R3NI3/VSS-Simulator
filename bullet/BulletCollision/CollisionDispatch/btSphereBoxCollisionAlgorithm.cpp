@@ -4,8 +4,8 @@ Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose, 
-including commercial applications, and to alter it and redistribute it freely, 
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it freely,
 subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
@@ -29,7 +29,7 @@ m_isSwapped(isSwapped)
 {
 	const btCollisionObjectWrapper* sphereObjWrap = m_isSwapped? col1Wrap : col0Wrap;
 	const btCollisionObjectWrapper* boxObjWrap = m_isSwapped? col0Wrap : col1Wrap;
-	
+
 	if (!m_manifoldPtr && m_dispatcher->needsCollision(sphereObjWrap->getCollisionObject(),boxObjWrap->getCollisionObject()))
 	{
 		m_manifoldPtr = m_dispatcher->getNewManifold(sphereObjWrap->getCollisionObject(),boxObjWrap->getCollisionObject());
@@ -98,7 +98,7 @@ btScalar btSphereBoxCollisionAlgorithm::calculateTimeOfImpact(btCollisionObject*
 }
 
 
-bool btSphereBoxCollisionAlgorithm::getSphereDistance(const btCollisionObjectWrapper* boxObjWrap, btVector3& pointOnBox, btVector3& normal, btScalar& penetrationDepth, const btVector3& sphereCenter, btScalar fRadius, btScalar maxContactDistance ) 
+bool btSphereBoxCollisionAlgorithm::getSphereDistance(const btCollisionObjectWrapper* boxObjWrap, btVector3& pointOnBox, btVector3& normal, btScalar& penetrationDepth, const btVector3& sphereCenter, btScalar fRadius, btScalar maxContactDistance )
 {
 	const btBoxShape* boxShape= (const btBoxShape*)boxObjWrap->getCollisionShape();
 	btVector3 const &boxHalfExtent = boxShape->getHalfExtentsWithoutMargin();
@@ -117,7 +117,7 @@ bool btSphereBoxCollisionAlgorithm::getSphereDistance(const btCollisionObjectWra
 	closestPoint.setY( btMax(-boxHalfExtent.getY(), closestPoint.getY()) );
 	closestPoint.setZ( btMin(boxHalfExtent.getZ(), closestPoint.getZ()) );
 	closestPoint.setZ( btMax(-boxHalfExtent.getZ(), closestPoint.getZ()) );
-	
+
 	btScalar intersectionDist = fRadius + boxMargin;
 	btScalar contactDist = intersectionDist + maxContactDistance;
 	normal = sphereRelPos - closestPoint;
@@ -143,7 +143,7 @@ bool btSphereBoxCollisionAlgorithm::getSphereDistance(const btCollisionObjectWra
 	}
 
 	pointOnBox = closestPoint + normal * boxMargin;
-//	v3PointOnSphere = sphereRelPos - (normal * fRadius);	
+//	v3PointOnSphere = sphereRelPos - (normal * fRadius);
 	penetrationDepth = distance - intersectionDist;
 
 	// transform back in world space
@@ -157,7 +157,7 @@ bool btSphereBoxCollisionAlgorithm::getSphereDistance(const btCollisionObjectWra
 	return true;
 }
 
-btScalar btSphereBoxCollisionAlgorithm::getSpherePenetration( btVector3 const &boxHalfExtent, btVector3 const &sphereRelPos, btVector3 &closestPoint, btVector3& normal ) 
+btScalar btSphereBoxCollisionAlgorithm::getSpherePenetration( btVector3 const &boxHalfExtent, btVector3 const &sphereRelPos, btVector3 &closestPoint, btVector3& normal )
 {
 	//project the center of the sphere on the closest face of the box
 	btScalar faceDist = boxHalfExtent.getX() - sphereRelPos.getX();

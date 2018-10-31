@@ -4,8 +4,8 @@ Copyright (c) 2011 Advanced Micro Devices, Inc.  http://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose, 
-including commercial applications, and to alter it and redistribute it freely, 
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it freely,
 subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
@@ -21,9 +21,9 @@ subject to the following restrictions:
 #include "btVector3.h"
 #include "btAlignedObjectArray.h"
 
-struct GrahamVector3 : public btVector3
+struct GrahambtVector3 : public btVector3
 {
-	GrahamVector3(const btVector3& org, int orgIndex)
+	GrahambtVector3(const btVector3& org, int orgIndex)
 		:btVector3(org),
 			m_orgIndex(orgIndex)
 	{
@@ -36,10 +36,10 @@ struct GrahamVector3 : public btVector3
 struct btAngleCompareFunc {
 	btVector3 m_anchor;
 	btAngleCompareFunc(const btVector3& anchor)
-	: m_anchor(anchor) 
+	: m_anchor(anchor)
 	{
 	}
-	bool operator()(const GrahamVector3& a, const GrahamVector3& b) const {
+	bool operator()(const GrahambtVector3& a, const GrahambtVector3& b) const {
 		if (a.m_angle != b.m_angle)
 			return a.m_angle < b.m_angle;
 		else
@@ -56,11 +56,11 @@ struct btAngleCompareFunc {
 	}
 };
 
-inline void GrahamScanConvexHull2D(btAlignedObjectArray<GrahamVector3>& originalPoints, btAlignedObjectArray<GrahamVector3>& hull, const btVector3& normalAxis)
+inline void GrahamScanConvexHull2D(btAlignedObjectArray<GrahambtVector3>& originalPoints, btAlignedObjectArray<GrahambtVector3>& hull, const btVector3& normalAxis)
 {
 	btVector3 axis0,axis1;
 	btPlaneSpace1(normalAxis,axis0,axis1);
-	
+
 
 	if (originalPoints.size()<=1)
 	{
@@ -85,17 +85,9 @@ inline void GrahamScanConvexHull2D(btAlignedObjectArray<GrahamVector3>& original
 	originalPoints[0].m_angle = -1e30f;
 	for (int i=1;i<originalPoints.size();i++)
 	{
-	    btVector3 ar = originalPoints[i]-originalPoints[0];
-	    btScalar ar1 = axis1.dot(ar);
-	    btScalar ar0 = axis0.dot(ar);
-	    if( ar1*ar1+ar0*ar0 < FLT_EPSILON ) 
-	    {
-	      originalPoints[i].m_angle = 0.0f;
-	    }
-	    else
-	    {
-	      originalPoints[i].m_angle = btAtan2Fast(ar1, ar0);
-	    }
+		btVector3 xvec = axis0;
+		btVector3 ar = originalPoints[i]-originalPoints[0];
+		originalPoints[i].m_angle = btCross(xvec, ar).dot(normalAxis) / ar.length();
 	}
 
 	//step 2: sort all points, based on 'angle' with this anchor
@@ -103,11 +95,11 @@ inline void GrahamScanConvexHull2D(btAlignedObjectArray<GrahamVector3>& original
 	originalPoints.quickSortInternal(comp,1,originalPoints.size()-1);
 
 	int i;
-	for (i = 0; i<2; i++) 
+	for (i = 0; i<2; i++)
 		hull.push_back(originalPoints[i]);
 
 	//step 3: keep all 'convex' points and discard concave points (using back tracking)
-	for (; i != originalPoints.size(); i++) 
+	for (; i != originalPoints.size(); i++)
 	{
 		bool isConvex = false;
 		while (!isConvex&& hull.size()>1) {
@@ -116,14 +108,9 @@ inline void GrahamScanConvexHull2D(btAlignedObjectArray<GrahamVector3>& original
 			isConvex = btCross(a-b,a-originalPoints[i]).dot(normalAxis)> 0;
 			if (!isConvex)
 				hull.pop_back();
-			else 
+			else
 				hull.push_back(originalPoints[i]);
 		}
-
-	    if( hull.size() == 1 )
-	    {
-	      hull.push_back( originalPoints[i] );
-	    }
 	}
 }
 

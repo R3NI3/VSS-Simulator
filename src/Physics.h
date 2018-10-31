@@ -29,6 +29,7 @@ class Physics{
 private:
 	int numTeams;
 	int numRobotsTeam;
+	bool randInit;
 
 	btDynamicsWorld* world;
 	btDispatcher* dispatcher;
@@ -62,6 +63,11 @@ public:
 	void setDebugWorld(int debugMode);
 
 	void resetRobotPositions();
+    void init_penalty_team_1();
+    void init_penalty_team_2();
+    void init_positions();
+
+    void test_penalty();
 
     int getNumTeams(){ return numTeams; }
 	btDynamicsWorld* getWorldPhysics() { return world; }
@@ -73,7 +79,9 @@ public:
 	vector<BulletObject*> getAllBtObj() { return bodies; }
 	vector<RobotPhysics*> getAllRobots() { return genRobots; }
 	vector<BulletObject*> getAllBtRobots();
+	btVector3 getRobotPosition(RobotPhysics* robot);
 	void setRobotsPosition(vector<btVector3>);
+	void setRobotsPosition(vector<btVector3>, vector<btVector3>);
 };
 
 #endif

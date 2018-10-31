@@ -4,8 +4,8 @@ Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose, 
-including commercial applications, and to alter it and redistribute it freely, 
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it freely,
 subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
@@ -22,8 +22,6 @@ subject to the following restrictions:
 
 #include "LinearMath/btQuaternion.h"
 #include "LinearMath/btSerializer.h"
-#include "btConvexPolyhedron.h"
-#include "LinearMath/btConvexHullComputer.h"
 
 btConvexHullShape ::btConvexHullShape (const btScalar* points,int numPoints,int stride) : btPolyhedralConvexAabbCachingShape ()
 {
@@ -64,7 +62,7 @@ btVector3	btConvexHullShape::localGetSupportingVertexWithoutMargin(const btVecto
 	btVector3 supVec(btScalar(0.),btScalar(0.),btScalar(0.));
 	btScalar maxDot = btScalar(-BT_LARGE_FLOAT);
 
-    // Here we take advantage of dot(a, b*c) = dot(a*b, c).  Note: This is true mathematically, but not numerically. 
+    // Here we take advantage of dot(a, b*c) = dot(a*b, c).  Note: This is true mathematically, but not numerically.
     if( 0 < m_unscaledPoints.size() )
     {
         btVector3 scaled = vec * m_localScaling;
@@ -93,7 +91,7 @@ void	btConvexHullShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const 
         {
             int i = (int) vec.maxDot( &m_unscaledPoints[0], m_unscaledPoints.size(), newDot);
             supportVerticesOut[j] = getScaledPoint(i);
-            supportVerticesOut[j][3] = newDot;        
+            supportVerticesOut[j][3] = newDot;
         }
         else
             supportVerticesOut[j][3] = -BT_LARGE_FLOAT;
@@ -102,7 +100,7 @@ void	btConvexHullShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const 
 
 
 }
-	
+
 
 
 btVector3	btConvexHullShape::localGetSupportingVertex(const btVector3& vec)const
@@ -115,7 +113,7 @@ btVector3	btConvexHullShape::localGetSupportingVertex(const btVector3& vec)const
 		if (vecnorm .length2() < (SIMD_EPSILON*SIMD_EPSILON))
 		{
 			vecnorm.setValue(btScalar(-1.),btScalar(-1.),btScalar(-1.));
-		} 
+		}
 		vecnorm.normalize();
 		supVertex+= getMargin() * vecnorm;
 	}
@@ -123,17 +121,10 @@ btVector3	btConvexHullShape::localGetSupportingVertex(const btVector3& vec)const
 }
 
 
-void btConvexHullShape::optimizeConvexHull()
-{
-	btConvexHullComputer conv;
-	conv.compute(&m_unscaledPoints[0].getX(), sizeof(btVector3),m_unscaledPoints.size(),0.f,0.f);
-	int numVerts = conv.vertices.size();
-	m_unscaledPoints.resize(0);
-	for (int i=0;i<numVerts;i++)
-    {
-        m_unscaledPoints.push_back(conv.vertices[i]);
-    }
-}
+
+
+
+
 
 
 
@@ -197,7 +188,7 @@ const char*	btConvexHullShape::serialize(void* dataBuffer, btSerializer* seriali
 	shapeData->m_unscaledPointsFloatPtr = numElem ? (btVector3Data*)serializer->getUniquePointer((void*)&m_unscaledPoints[0]):  0;
 	shapeData->m_unscaledPointsDoublePtr = 0;
 #endif
-	
+
 	if (numElem)
 	{
 		int sz = sizeof(btVector3Data);
@@ -211,9 +202,6 @@ const char*	btConvexHullShape::serialize(void* dataBuffer, btSerializer* seriali
 		}
 		serializer->finalizeChunk(chunk,btVector3DataName,BT_ARRAY_CODE,(void*)&m_unscaledPoints[0]);
 	}
-
-	// Fill padding with zeros to appease msan.
-	memset(shapeData->m_padding3, 0, sizeof(shapeData->m_padding3));
 
 	return "btConvexHullShapeData";
 }
@@ -230,12 +218,12 @@ void btConvexHullShape::project(const btTransform& trans, const btVector3& dir, 
 		btVector3 vtx = m_unscaledPoints[i] * m_localScaling;
 		btVector3 pt = trans * vtx;
 		btScalar dp = pt.dot(dir);
-		if(dp < minProj)	
+		if(dp < minProj)
 		{
 			minProj = dp;
 			witnesPtMin = pt;
 		}
-		if(dp > maxProj)	
+		if(dp > maxProj)
 		{
 			maxProj = dp;
 			witnesPtMax=pt;

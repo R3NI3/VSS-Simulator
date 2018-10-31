@@ -40,6 +40,8 @@ public:
 
 	virtual void debugDraw(btIDebugDraw* debugDrawer) = 0;
 
+	virtual void debugDrawProperties() = 0;
+
 };
 
 #endif //_BT_ACTION_INTERFACE_H

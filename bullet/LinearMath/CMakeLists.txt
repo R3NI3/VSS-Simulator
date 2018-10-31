@@ -11,8 +11,6 @@ SET(LinearMath_SRCS
 	btPolarDecomposition.cpp
 	btQuickprof.cpp
 	btSerializer.cpp
-	btSerializer64.cpp
-	btThreads.cpp
 	btVector3.cpp
 )
 
@@ -40,7 +38,6 @@ SET(LinearMath_HDRS
 	btScalar.h
 	btSerializer.h
 	btStackAlloc.h
-	btThreads.h
 	btTransform.h
 	btTransformUtil.h
 	btVector3.h
@@ -57,7 +54,7 @@ IF (INSTALL_LIBS)
 			IF (APPLE AND BUILD_SHARED_LIBS AND FRAMEWORK)
 				INSTALL(TARGETS LinearMath DESTINATION .)
 			ELSE (APPLE AND BUILD_SHARED_LIBS AND FRAMEWORK)
-				INSTALL(TARGETS LinearMath
+				INSTALL(TARGETS LinearMath 
 					RUNTIME DESTINATION bin
 					LIBRARY DESTINATION lib${LIB_SUFFIX}
 					ARCHIVE DESTINATION lib${LIB_SUFFIX})

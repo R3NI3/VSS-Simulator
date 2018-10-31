@@ -1,4 +1,4 @@
-CCX = g++ -std=c++11 -w
+CCX = g++ -std=c++11 -w -O3
 
 
 INCLUDES = -Ibullet/ -Iutils/ -Isrc -Isrc/strategies

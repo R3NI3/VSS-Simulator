@@ -4,8 +4,8 @@ Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
-Permission is granted to anyone to use this software for any purpose, 
-including commercial applications, and to alter it and redistribute it freely, 
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it freely,
 subject to the following restrictions:
 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
@@ -18,7 +18,7 @@ subject to the following restrictions:
 #include "BulletCollision/BroadphaseCollision/btDbvt.h"
 #include "LinearMath/btSerializer.h"
 
-btCompoundShape::btCompoundShape(bool enableDynamicAabbTree, const int initialChildCapacity)
+btCompoundShape::btCompoundShape(bool enableDynamicAabbTree)
 : m_localAabbMin(btScalar(BT_LARGE_FLOAT),btScalar(BT_LARGE_FLOAT),btScalar(BT_LARGE_FLOAT)),
 m_localAabbMax(btScalar(-BT_LARGE_FLOAT),btScalar(-BT_LARGE_FLOAT),btScalar(-BT_LARGE_FLOAT)),
 m_dynamicAabbTree(0),
@@ -34,8 +34,6 @@ m_localScaling(btScalar(1.),btScalar(1.),btScalar(1.))
 		m_dynamicAabbTree = new(mem) btDbvt();
 		btAssert(mem==m_dynamicAabbTree);
 	}
-
-	m_children.reserve(initialChildCapacity);
 }
 
 
@@ -60,7 +58,7 @@ void	btCompoundShape::addChildShape(const btTransform& localTransform,btCollisio
 	child.m_childShapeType = shape->getShapeType();
 	child.m_childMargin = shape->getMargin();
 
-	
+
 	//extend the local aabbMin/aabbMax
 	btVector3 localAabbMin,localAabbMax;
 	shape->getAabb(localTransform,localAabbMin,localAabbMax);
@@ -79,8 +77,8 @@ void	btCompoundShape::addChildShape(const btTransform& localTransform,btCollisio
 	if (m_dynamicAabbTree)
 	{
 		const btDbvtVolume	bounds=btDbvtVolume::FromMM(localAabbMin,localAabbMax);
-		size_t index = m_children.size();
-		child.m_node = m_dynamicAabbTree->insert(bounds,reinterpret_cast<void*>(index) );
+		int index = m_children.size();
+		child.m_node = m_dynamicAabbTree->insert(bounds,(void*)index);
 	}
 
 	m_children.push_back(child);
@@ -116,7 +114,7 @@ void btCompoundShape::removeChildShapeByIndex(int childShapeIndex)
 		m_dynamicAabbTree->remove(m_children[childShapeIndex].m_node);
 	}
 	m_children.swap(childShapeIndex,m_children.size()-1);
-    if (m_dynamicAabbTree) 
+    if (m_dynamicAabbTree)
 		m_children[childShapeIndex].m_node->dataAsInt = childShapeIndex;
 	m_children.pop_back();
 
@@ -170,7 +168,7 @@ void btCompoundShape::getAabb(const btTransform& trans,btVector3& aabbMin,btVect
 {
 	btVector3 localHalfExtents = btScalar(0.5)*(m_localAabbMax-m_localAabbMin);
 	btVector3 localCenter = btScalar(0.5)*(m_localAabbMax+m_localAabbMin);
-	
+
 	//avoid an illegal AABB when there are no children
 	if (!m_children.size())
 	{
@@ -178,16 +176,16 @@ void btCompoundShape::getAabb(const btTransform& trans,btVector3& aabbMin,btVect
 		localCenter.setValue(0,0,0);
 	}
 	localHalfExtents += btVector3(getMargin(),getMargin(),getMargin());
-		
 
-	btMatrix3x3 abs_b = trans.getBasis().absolute();  
+
+	btMatrix3x3 abs_b = trans.getBasis().absolute();
 
 	btVector3 center = trans(localCenter);
 
     btVector3 extent = localHalfExtents.dot3(abs_b[0], abs_b[1], abs_b[2]);
 	aabbMin = center-extent;
 	aabbMax = center+extent;
-	
+
 }
 
 void	btCompoundShape::calculateLocalInertia(btScalar mass,btVector3& inertia) const
@@ -259,8 +257,8 @@ void btCompoundShape::calculatePrincipalAxisTransform(btScalar* masses, btTransf
 		j[0].setValue(o2, 0, 0);
 		j[1].setValue(0, o2, 0);
 		j[2].setValue(0, 0, o2);
-		j[0] += o * -o.x(); 
-		j[1] += o * -o.y(); 
+		j[0] += o * -o.x();
+		j[1] += o * -o.y();
 		j[2] += o * -o.z();
 
 		//add inertia tensor of pointmass
@@ -290,7 +288,7 @@ void btCompoundShape::setLocalScaling(const btVector3& scaling)
 		childTrans.setOrigin((childTrans.getOrigin()) * scaling / m_localScaling);
 		updateChildTransform(i, childTrans,false);
 	}
-	
+
 	m_localScaling = scaling;
 	recalculateLocalAabb();
 
@@ -314,8 +312,7 @@ void btCompoundShape::createAabbTreeFromChildren()
             child.m_childShape->getAabb(child.m_transform,localAabbMin,localAabbMax);
 
             const btDbvtVolume  bounds=btDbvtVolume::FromMM(localAabbMin,localAabbMax);
-			size_t index2 = index;
-            child.m_node = m_dynamicAabbTree->insert(bounds, reinterpret_cast<void*>(index2) );
+            child.m_node = m_dynamicAabbTree->insert(bounds,(void*)index);
         }
     }
 }
@@ -347,7 +344,7 @@ const char*	btCompoundShape::serialize(void* dataBuffer, btSerializer* serialize
 				btChunk* chunk = serializer->allocate(m_children[i].m_childShape->calculateSerializeBufferSize(),1);
 				const char* structType = m_children[i].m_childShape->serialize(chunk->m_oldPtr,serializer);
 				serializer->finalizeChunk(chunk,structType,BT_SHAPE_CODE,m_children[i].m_childShape);
-			} 
+			}
 
 			memPtr->m_childShapeType = m_children[i].m_childShapeType;
 			m_children[i].m_transform.serializeFloat(memPtr->m_transform);

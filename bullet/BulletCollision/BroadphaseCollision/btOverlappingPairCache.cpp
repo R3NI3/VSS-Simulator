@@ -34,6 +34,7 @@ int gFindPairs =0;
 
 btHashedOverlappingPairCache::btHashedOverlappingPairCache():
 	m_overlapFilterCallback(0),
+	m_blockedForChanges(false),
 	m_ghostPairCallback(0)
 {
 	int initialAllocatedSize= 2;
@@ -372,10 +373,10 @@ void* btHashedOverlappingPairCache::removeOverlappingPair(btBroadphaseProxy* pro
 	return userData;
 }
 //#include <stdio.h>
-#include "LinearMath/btQuickprof.h"
+
 void	btHashedOverlappingPairCache::processAllOverlappingPairs(btOverlapCallback* callback,btDispatcher* dispatcher)
 {
-	BT_PROFILE("btHashedOverlappingPairCache::processAllOverlappingPairs");
+
 	int i;
 
 //	printf("m_overlappingPairArray.size()=%d\n",m_overlappingPairArray.size());

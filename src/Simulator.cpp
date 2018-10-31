@@ -365,13 +365,13 @@ void Simulator::updateReport(){
         listRobots.at(i)->body->getMotionState()->getWorldTransform(transTemp);
 
         btVector3 rbPos = transTemp.getOrigin();
-		  cout << "pos:" << rbPos.getX() << ", " << rbPos.getZ() << ", " << rbPos.getY() << endl;
+		  //cout << "pos:" << rbPos.getX() << ", " << rbPos.getZ() << ", " << rbPos.getY() << endl;
         btVector3 ballPos = physics->getBallPosition();
 
         btVector3 dBallRbDist = rbPos - ballPos;
 
         btVector3 velRobot = listRobots.at(i)->body->getLinearVelocity()*timeStep;
-		  cout << "spd:" << velRobot.getX() << ", " << velRobot.getZ() << ", " << velRobot.getY() << endl;
+		  //cout << "spd:" << velRobot.getX() << ", " << velRobot.getZ() << ", " << velRobot.getY() << endl;
 
         //btVector3 rotRobot = listRobots.at(i)->body->getRotation();
 		  //cout << "spd:" << rotRobot.getX() << ", " << rotRobot.getZ() << ", " << rotRobots.getY() << endl;

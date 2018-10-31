@@ -69,6 +69,166 @@ bool check_dist(vector <btVector3> vec, btVector3 t){
     return ret;
 }
 
+void Physics::test_penalty() {
+    vector<btVector3> robots;
+    vector<btVector3> angles;
+
+//team 1
+//    //offenders
+//    robots.push_back(btVector3(15,4,SIZE_DEPTH/2.0-10));
+//    robots.push_back(btVector3(15,4,SIZE_DEPTH/2.0+10));
+//
+//    //others
+//    robots.push_back(btVector3(80,4,78));
+//
+//    //goalkeeper
+//    robots.push_back(btVector3(160,4,SIZE_DEPTH/2.0));
+//    angles.push_back(btVector3(0,90,0));
+//
+//    robots.push_back(btVector3(80,4,52));
+//    angles.push_back(btVector3(0,90,0));
+//
+//    robots.push_back(btVector3(80,4,104));
+//    angles.push_back(btVector3(0,90,0));
+//
+//    setBallPosition(btVector3(11, 2.0, SIZE_DEPTH/2.0+15));
+
+//Team 2
+    //others
+    robots.push_back(btVector3(80,4,78));
+
+    //goalkeeper
+    robots.push_back(btVector3(160,4,SIZE_DEPTH/2.0));
+    angles.push_back(btVector3(0,90,0));
+
+    robots.push_back(btVector3(80,4,52));
+    angles.push_back(btVector3(0,90,0));
+
+    robots.push_back(btVector3(80,4,104));
+    angles.push_back(btVector3(0,90,0));
+
+    //offenders
+    robots.push_back(btVector3(150,4,SIZE_DEPTH/2.0-10));
+    robots.push_back(btVector3(150,4,SIZE_DEPTH/2.0+10));
+
+    setBallPosition(btVector3(159, 2.0, SIZE_DEPTH/2.0+15));
+
+    setRobotsPosition(robots);
+}
+
+
+void Physics::init_penalty_team_1() {
+    vector<btVector3> robots;
+    vector<btVector3> angles;
+
+    //striker
+    robots.push_back(btVector3(114-2+rand()%4,5,SIZE_DEPTH/2.0-2+rand()%4));
+    angles.push_back(btVector3(0,90-5+rand()%10,0));
+
+    robots.push_back(btVector3(80,5,26));
+    angles.push_back(btVector3(0,90,0));
+
+    robots.push_back(btVector3(80,5,78));
+    angles.push_back(btVector3(0,90,0));
+
+    //goalkeeper
+    robots.push_back(btVector3(160-2+rand()%4,5,SIZE_DEPTH/2.0-2+rand()%4));
+    if (rand()%2==0)
+        angles.push_back(btVector3(0,90-5+rand()%10,0));
+    else
+        angles.push_back(btVector3(0,0-5+rand()%10,0));
+
+    robots.push_back(btVector3(80,5,52));
+    angles.push_back(btVector3(0,90,0));
+
+    robots.push_back(btVector3(80,5,104));
+    angles.push_back(btVector3(0,90,0));
+
+    setBallPosition(btVector3(122.5-1+rand()%2, 2.0, SIZE_DEPTH/2.0-1+rand()%2));
+    setRobotsPosition(robots, angles);
+}
+
+void Physics::init_penalty_team_2() {
+    vector<btVector3> robots;
+    vector<btVector3> angles;
+
+    //goalkeeper
+    robots.push_back(btVector3(10-2+rand()%4,5,SIZE_DEPTH/2.0-2+rand()%4));
+    if (rand()%2==0)
+        angles.push_back(btVector3(0,90-5+rand()%10,0));
+    else
+        angles.push_back(btVector3(0,0-5+rand()%10,0));
+
+    robots.push_back(btVector3(90,5,52));
+    angles.push_back(btVector3(0,90,0));
+    robots.push_back(btVector3(90,5,104));
+    angles.push_back(btVector3(0,90,0));
+
+    //striker
+    robots.push_back(btVector3(56-2+rand()%4,5,SIZE_DEPTH/2.0-2+rand()%4));
+    angles.push_back(btVector3(0,90-5+rand()%10,0));
+
+    robots.push_back(btVector3(90,5,26));
+    angles.push_back(btVector3(0,90,0));
+    robots.push_back(btVector3(90,5,78));
+    angles.push_back(btVector3(0,90,0));
+
+    setBallPosition(btVector3(47.5, 2.0-1+rand()%2, SIZE_DEPTH/2.0-1+rand()%2));
+    setRobotsPosition(robots, angles);
+}
+
+
+void Physics::init_positions() {
+
+    if (this->randInit) {
+        vector<btVector3> robots;
+        vector<btVector3> posBall;
+        posBall.push_back(btVector3((rand()%150)+10, 0, (rand()%110)+10));
+        int x1, x2, z1, z2, ang1, ang2;
+
+        for(int i = 0;i < numRobotsTeam;i++){
+            x1 = (rand()%130)+20;
+            x2 = (rand()%130)+20;
+            z1 = (rand()%110)+10;
+            z2 = (rand()%110)+10;
+
+            btVector3 pos1 = btVector3(x1, 5, z1);
+            btVector3 pos2 = btVector3(x2, 5, z2);
+
+            while (!(check_dist(robots, pos1) && check_dist(posBall, pos1))){
+                x1 = (rand()%130)+20;
+                z1 = (rand()%110)+10;
+                pos1 = btVector3(x1, 5, z1);
+            }
+            robots.push_back(pos1);
+            while (!(check_dist(robots, pos2) && check_dist(posBall, pos2))){
+                x2 = (rand()%130)+20;
+                z2 = (rand()%110)+10;
+                pos2 = btVector3(x2, 5, z2);
+            }
+            robots.push_back(pos2);
+        }
+
+        setRobotsPosition(robots);
+
+        setBallPosition(posBall[0]);
+        setBallVelocity(btVector3((2*(rand()%100))/100.0-1, 0, (8*(rand()%100))/100.0-4));
+    } else {
+
+        vector<btVector3> robots;
+
+        robots.push_back(btVector3(55,4,45));
+        robots.push_back(btVector3(35,4,30));
+        robots.push_back(btVector3(15,4,SIZE_DEPTH- 55));
+        robots.push_back(btVector3(SIZE_WIDTH-55,4,85));
+        robots.push_back(btVector3(SIZE_WIDTH-25,4,SIZE_DEPTH - SIZE_DEPTH/2.5 + 20));
+        robots.push_back(btVector3(SIZE_WIDTH-15,4,55));
+
+        setBallPosition(btVector3( (SIZE_WIDTH/2.0)+10 , 2.0, SIZE_DEPTH/2.0));
+        setRobotsPosition(robots);
+    }
+}
+
 void Physics::registBodies(bool randInit){
     addFloor();
     time_t t;
@@ -78,40 +238,11 @@ void Physics::registBodies(bool randInit){
     vector <btVector3> posBall;
     int x1,x2,z1,z2;
 
-    if(randInit){
-        posBall.push_back(btVector3(85, 0, (rand()%110)+10));
-        addBall(2.5, posBall[0], 0.08);
+    this->randInit = randInit;
 
-        for(int i = 0;i < numRobotsTeam;i++){
-        x1 = (rand()%130)+20;
-        x2 = (rand()%130)+20;
-        z1 = (rand()%110)+10;
-        z2 = (rand()%110)+10;
-
-        btVector3 pos1 = btVector3(x1, 5, z1);
-        btVector3 pos2 = btVector3(x2, 5, z2);
-
-            while (!(check_dist(posTeam1, pos1) && check_dist(posTeam2, pos1) && check_dist(posBall, pos1))){
-                x1 = (rand()%130)+20;
-                z1 = (rand()%110)+10;
-                pos1 = btVector3(x1, 5, z1);
-            }
-            posTeam1.push_back(pos1);
-            while (!(check_dist(posTeam1, pos2) && check_dist(posTeam2, pos2) && check_dist(posBall, pos2))){
-                x2 = (rand()%130)+20;
-                z2 = (rand()%110)+10;
-                pos2 = btVector3(x2, 5, z2);
-            }
-            posTeam2.push_back(pos2);
-
-        }
-		  //Random velocity for ball
-		  setBallVelocity(btVector3((2*(rand()%100))/100.0-1, 0, (8*(rand()%100))/100.0-4));
-    } else {
-        addBall(2.5, btVector3(85, 0, 65), 0.08); //center
-        posTeam1 = vector <btVector3> {btVector3(25,5,SIZE_DEPTH- 55),btVector3(35,5,30),btVector3(55,5,45)};
-        posTeam2 = vector <btVector3> {btVector3(SIZE_WIDTH-15,5,55),btVector3(SIZE_WIDTH-25,5,SIZE_DEPTH - SIZE_DEPTH/2.5 + 20),btVector3(SIZE_WIDTH-55,5,85)};
-    }
+    addBall(2.5, btVector3(85, 0, 65), 0.08); //center
+    posTeam1 = vector <btVector3> {btVector3(25,5,SIZE_DEPTH- 55),btVector3(35,5,30),btVector3(55,5,45)};
+    posTeam2 = vector <btVector3> {btVector3(SIZE_WIDTH-15,5,55),btVector3(SIZE_WIDTH-25,5,SIZE_DEPTH - SIZE_DEPTH/2.5 + 20),btVector3(SIZE_WIDTH-55,5,85)};
 
     //Create robots here
     //Team 1
@@ -126,6 +257,11 @@ void Physics::registBodies(bool randInit){
             addRobot(Color(0.3,0.3,0.3),posTeam2[i],btVector3(0,-100,0),8,0.25,clrPlayers[i],clrTeams[1], numRobotsTeam+i);
         }
     }
+
+    //this->init_positions();
+    //this->init_penalty_team_2();
+    this->test_penalty();
+
     // PAREDE DE CIMA
     addWall(Color(0,0,0), btVector3((SIZE_WIDTH/2.0) + GOAL_WIDTH, 0, 0), SIZE_WIDTH, 15, 2.5, 0);
     // PAREDE DE BAIXO
@@ -271,6 +407,12 @@ btVector3 Physics::getBallPosition(){
 	return ballPos;
 }
 
+btVector3 Physics::getRobotPosition(RobotPhysics* robot){
+    btTransform  transTemp;
+    robot->getRigidBody()->getMotionState()->getWorldTransform(transTemp);
+    return transTemp.getOrigin();
+}
+
 btVector3 Physics::getBallVelocity(){
     btVector3 ballVel;
 	for(int i=0;i<bodies.size();i++){
@@ -333,25 +475,57 @@ void Physics::setRobotsPosition(vector<btVector3> new_poses){
     }
 }
 
+void Physics::setRobotsPosition(vector<btVector3> new_poses, vector<btVector3> rotations){
+    for(int i=0;i<genRobots.size();i++){
+        btTransform t;
+        genRobots[i]->getRigidBody()->getMotionState()->getWorldTransform(t);
+
+        t.setIdentity();
+        t.setOrigin(new_poses[i]);
+
+        btVector3 rotation = rotations[i];
+        if (rotation.length()!=0) {
+            rotation *= PI/180;
+            float rad = rotation.length();
+            btVector3 axis = rotation.normalize();
+            btQuaternion quat(axis,rad);
+            t.setRotation(quat);
+        }
+
+        btMotionState* motion = new btDefaultMotionState(t);
+
+        genRobots[i]->getRigidBody()->setMotionState(motion);
+        genRobots[i]->getRigidBody()->setLinearVelocity(btVector3(0,0,0));
+        genRobots[i]->getRigidBody()->setAngularVelocity(btVector3(0,0,0));
+    }
+}
+
 void Physics::startDebug(){
     world->debugDrawWorld();
 }
 
 void Physics::setDebugWorld(int debugMode){
+    vector<int> debugDrawMode;
     ((GLDebugDrawer*)world-> getDebugDrawer())->setDrawScenarioMode(true);
     switch (debugMode){
         case 0:{
-            world->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_NoDebug);
+            debugDrawMode.push_back(btIDebugDraw::DBG_NoDebug);
+            world->getDebugDrawer()->setDebugMode(debugDrawMode);
         }break;
         case 1:{
-            world->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawWireframe | btIDebugDraw::DBG_DrawFeaturesText);
+            debugDrawMode.push_back(btIDebugDraw::DBG_DrawLocalProperties);
+            debugDrawMode.push_back(btIDebugDraw::DBG_DrawWireframe);
+            world->getDebugDrawer()->setDebugMode(debugDrawMode);
             ((GLDebugDrawer*)world-> getDebugDrawer())->setDrawScenarioMode(false);
         }break;
         case 2:{
-            world-> getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawWireframe | btIDebugDraw::DBG_DrawFeaturesText);
+            debugDrawMode.push_back(btIDebugDraw::DBG_DrawWireframe);
+            debugDrawMode.push_back(btIDebugDraw::DBG_DrawLocalProperties);
+            world-> getDebugDrawer()->setDebugMode(debugDrawMode);
         }break;
     }
 }
+
 
 btRigidBody* Physics::addFloor(){
 	string name = "floor";

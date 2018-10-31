@@ -362,8 +362,8 @@ public:
 		// Compute new center
 		center = trans(center);
 
-        btVector3 textends = extends.dot3(trans.getBasis().getRow(0).absolute(), 
-                                          trans.getBasis().getRow(1).absolute(), 
+        btVector3 textends = extends.dot3(trans.getBasis().getRow(0).absolute(),
+                                          trans.getBasis().getRow(1).absolute(),
                                           trans.getBasis().getRow(2).absolute());
 
 		m_min = center - textends;
@@ -379,10 +379,10 @@ public:
 		// Compute new center
 		center = trans.transform(center);
 
-        btVector3 textends = extends.dot3(trans.m_R1to0.getRow(0).absolute(), 
-                                          trans.m_R1to0.getRow(1).absolute(), 
+        btVector3 textends = extends.dot3(trans.m_R1to0.getRow(0).absolute(),
+                                          trans.m_R1to0.getRow(1).absolute(),
                                           trans.m_R1to0.getRow(2).absolute());
-        
+
 		m_min = center - textends;
 		m_max = center + textends;
 	}
