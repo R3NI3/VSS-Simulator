@@ -258,9 +258,9 @@ void Physics::registBodies(bool randInit){
         }
     }
 
-    //this->init_positions();
+    this->init_positions();
     //this->init_penalty_team_2();
-    this->test_penalty();
+    //this->test_penalty();
 
     // PAREDE DE CIMA
     addWall(Color(0,0,0), btVector3((SIZE_WIDTH/2.0) + GOAL_WIDTH, 0, 0), SIZE_WIDTH, 15, 2.5, 0);
