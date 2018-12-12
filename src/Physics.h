@@ -66,6 +66,7 @@ public:
     void init_penalty_team_1();
     void init_penalty_team_2();
     void init_positions();
+    void init_goalkeeper_train();
 
     void test_penalty();
 

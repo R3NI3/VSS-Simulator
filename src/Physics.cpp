@@ -126,10 +126,10 @@ void Physics::init_penalty_team_1() {
     angles.push_back(btVector3(0,90-5+rand()%10,0));
 
     robots.push_back(btVector3(80,5,26));
-    angles.push_back(btVector3(0,90,0));
+    angles.push_back(btVector3(0,rand()%360,0));
 
     robots.push_back(btVector3(80,5,78));
-    angles.push_back(btVector3(0,90,0));
+    angles.push_back(btVector3(0,rand()%360,0));
 
     //goalkeeper
     robots.push_back(btVector3(160-2+rand()%4,5,SIZE_DEPTH/2.0-2+rand()%4));
@@ -139,10 +139,10 @@ void Physics::init_penalty_team_1() {
         angles.push_back(btVector3(0,0-5+rand()%10,0));
 
     robots.push_back(btVector3(80,5,52));
-    angles.push_back(btVector3(0,90,0));
+    angles.push_back(btVector3(0,rand()%360,0));
 
     robots.push_back(btVector3(80,5,104));
-    angles.push_back(btVector3(0,90,0));
+    angles.push_back(btVector3(0,rand()%360,0));
 
     setBallPosition(btVector3(122.5-1+rand()%2, 2.0, SIZE_DEPTH/2.0-1+rand()%2));
     setRobotsPosition(robots, angles);
@@ -160,37 +160,80 @@ void Physics::init_penalty_team_2() {
         angles.push_back(btVector3(0,0-5+rand()%10,0));
 
     robots.push_back(btVector3(90,5,52));
-    angles.push_back(btVector3(0,90,0));
+    angles.push_back(btVector3(0,rand()%360,0));
     robots.push_back(btVector3(90,5,104));
-    angles.push_back(btVector3(0,90,0));
+    angles.push_back(btVector3(0,rand()%360,0));
 
     //striker
     robots.push_back(btVector3(56-2+rand()%4,5,SIZE_DEPTH/2.0-2+rand()%4));
     angles.push_back(btVector3(0,90-5+rand()%10,0));
 
     robots.push_back(btVector3(90,5,26));
-    angles.push_back(btVector3(0,90,0));
+    angles.push_back(btVector3(0,rand()%360,0));
     robots.push_back(btVector3(90,5,78));
-    angles.push_back(btVector3(0,90,0));
+    angles.push_back(btVector3(0,rand()%360,0));
 
     setBallPosition(btVector3(47.5, 2.0-1+rand()%2, SIZE_DEPTH/2.0-1+rand()%2));
     setRobotsPosition(robots, angles);
 }
 
+void Physics::init_goalkeeper_train() {
+
+        vector<btVector3> robots;
+        vector<btVector3> angles;
+        vector<btVector3> posBall;
+        posBall.push_back(btVector3((rand()%150)+10, 0, (rand()%110)+10));
+        int x1, z1, ang1;
+
+        //goalkeeper
+        robots.push_back(btVector3(10-2+rand()%4,5,SIZE_DEPTH/2.0-2+rand()%4));
+        if (rand()%2==0)
+            angles.push_back(btVector3(0,90-5+rand()%10,0));
+        else
+            angles.push_back(btVector3(0,0-5+rand()%10,0));
+
+         //others
+
+        for(int i = 1;i < 2*numRobotsTeam;i++){
+            x1 = (rand()%130)+20;
+            z1 = (rand()%110)+10;
+            ang1 = (rand()%360);
+
+            btVector3 pos1 = btVector3(x1, 5, z1);
+            angles.push_back(btVector3(0,ang1,0));
+
+            while (!(check_dist(robots, pos1) && check_dist(posBall, pos1))){
+                x1 = (rand()%130)+20;
+                z1 = (rand()%110)+10;
+                pos1 = btVector3(x1, 5, z1);
+            }
+            robots.push_back(pos1);
+        }
+
+        setRobotsPosition(robots, angles);
+
+        setBallPosition(posBall[0]);
+        setBallVelocity(btVector3((-90*(rand()%100))/100.0-10, 0, (2*(rand()%100))/100.0-1));
+}
 
 void Physics::init_positions() {
 
+//      init_goalkeeper_train();
+
     if (this->randInit) {
         vector<btVector3> robots;
+        vector<btVector3> angles;
         vector<btVector3> posBall;
-        posBall.push_back(btVector3((rand()%150)+10, 0, (rand()%110)+10));
+        posBall.push_back(btVector3((rand()%150)+10, 0, (rand()%100)+10));
         int x1, x2, z1, z2, ang1, ang2;
 
         for(int i = 0;i < numRobotsTeam;i++){
             x1 = (rand()%130)+20;
             x2 = (rand()%130)+20;
+            ang1 = rand()%360;
             z1 = (rand()%110)+10;
             z2 = (rand()%110)+10;
+            ang2 = rand()%360;
 
             btVector3 pos1 = btVector3(x1, 5, z1);
             btVector3 pos2 = btVector3(x2, 5, z2);
@@ -201,15 +244,18 @@ void Physics::init_positions() {
                 pos1 = btVector3(x1, 5, z1);
             }
             robots.push_back(pos1);
+            angles.push_back(btVector3(0,ang1,0));
+
             while (!(check_dist(robots, pos2) && check_dist(posBall, pos2))){
                 x2 = (rand()%130)+20;
                 z2 = (rand()%110)+10;
                 pos2 = btVector3(x2, 5, z2);
             }
             robots.push_back(pos2);
+            angles.push_back(btVector3(0,ang2,0));
         }
 
-        setRobotsPosition(robots);
+        setRobotsPosition(robots, angles);
 
         setBallPosition(posBall[0]);
         setBallVelocity(btVector3((2*(rand()%100))/100.0-1, 0, (8*(rand()%100))/100.0-4));
