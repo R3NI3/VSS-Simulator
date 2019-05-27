@@ -53,7 +53,7 @@ private:
     bool has_new_name_team_2;
     int port;
     string address;
-	 bool enableBlue;
+	bool enableBlue;
 
     Report report;
     bool finish_match;
@@ -85,7 +85,7 @@ private:
     int count_situation, situation_team1, situation_team2;
 
 	void updateWorld();
-   void updateReport();
+    void updateReport();
 	btVector3 calcRelativePosition(btVector3 absPos, int attackDir);
 	void calcRelativeWorld(vector<RobotStrategy*> robotStrategiesTeam, int attackDir);
 	RobotStrategy* updateLocalPhysics(int id, RobotPhysics* bdRobot);
@@ -96,13 +96,11 @@ private:
     btVector3 getRobotVelocity(RobotPhysics* robot);
     btVector3 getRobotAngVelocity(RobotPhysics* robot);
 
-    //Auto simulation speed control:
-    int delay;       //miliseconds
     int commandFreq; //miliseconds/command
-    int desiredFreq; //miliseconds/command
+    int stepNextSend;
+    int responses;
 
-    unsigned int calculateCommandFreq();
-    unsigned int adjustDelay(int currentDelay, int currtFreq, int desiredFreq);
+    void waitTeams(int timeout);
 
 public:
 	Simulator();

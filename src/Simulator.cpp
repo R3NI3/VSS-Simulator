@@ -15,11 +15,14 @@ copies or substantial portions of the Software.
 
 #include "Simulator.h"
 
+#define SYNC_TIMEOUT 500 //ms
+
 Simulator::Simulator(){
     contDebug = 0;
     stratStep = 0;
 	loopBullet = 0;
 	numRobotsTeam = NUM_ROBOTS_TEAM;
+	responses = 0;
 
 	gameState = new GameState();
     caseWorld = NONE;
@@ -53,24 +56,17 @@ void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTea
     this->develop_mode = develop_mode;
     this->address = "tcp://*:";
     this->port = port;
-	 this->enableBlue = false;
+	this->enableBlue = false;
 
     if (iaMode == 1) 
 		this->enableBlue = true;
 
-    //sim speed control
-    if (rate<0) {
-        desiredFreq = rate; //(negative values for a fixed simulation delay)
-        delay = -rate;
-    }
-    else {
-        delay = 9000;//1000000.f*timeStep/handTime; handTime = 1.f;
-        desiredFreq = commandFreq = rate - 33;  
-    }
+    //sim sync control
+    commandFreq = rate;
 
     timeStep = SIMULATION_TIME_STEP;
 
-    cout << "Sincro time:" << desiredFreq << endl;
+    cout << "Sincro time:" << rate << endl;
     
     int numTeams = 0;
 	if(stratBlueTeam) {
@@ -127,9 +123,6 @@ void Simulator::runReceiveTeam1(){
         global_commands_team_1 = vss_command::Global_Commands();
         interface.receiveCommandTeam1();
         //cout << "Team1" << endl;
-        commandFreq = calculateCommandFreq();
-        delay = adjustDelay(delay, commandFreq, desiredFreq);
-
 
         if(status_team_1 == -1){
             status_team_1 = 0;
@@ -145,6 +138,8 @@ void Simulator::runReceiveTeam1(){
             name_team_1 = global_commands_team_1.name();
             has_new_name_team_1 = true;
         }
+
+        this->responses++;
     }
 }
 
@@ -157,7 +152,6 @@ void Simulator::runReceiveTeam2(){
         global_commands_team_2 = vss_command::Global_Commands();
         interface.receiveCommandTeam2();
         //cout << "Team2" << endl;
-        commandFreq = calculateCommandFreq();
 
         if(status_team_2 == -1){
             status_team_2 = 0;
@@ -173,6 +167,8 @@ void Simulator::runReceiveTeam2(){
             name_team_2 = global_commands_team_2.name();
             has_new_name_team_2 = true;
         }
+
+        this->responses++;
     }
 }
 
@@ -263,48 +259,35 @@ void Simulator::runSender(){
     interface_sender.sendState();
 }
 
-unsigned int Simulator::calculateCommandFreq() {
-    unsigned int currentTime = arbiter.checkTimeMs();
-    static unsigned int lastTime = currentTime;
-    unsigned int deltaT;
+void Simulator::waitTeams(int timeout) {
+   int team_count = 0;
 
-    if (currentTime<lastTime) {
-        deltaT = lastTime;
-    } else {
-        deltaT = (currentTime - lastTime);
-    }
-    lastTime = currentTime;
+   runSender();
 
-    return deltaT;
-}   
+   while (true) {
+       if (status_team_1>=0) team_count++;
+       if (status_team_2>=0) team_count++;
+       if (team_count == 0) {
 
-unsigned int Simulator::adjustDelay(int currentDelay, int currtFreq, int desiredFreq) {
-    if (desiredFreq<0)
-        return delay;
+            runSender();
+            usleep(200);
+       }
+       else break;
+   }
 
-    //performe a moving average on input frequency:
-    static int avgFreq = currtFreq;
-    float w = 0.9;
-    avgFreq = (1-w)*((int)currtFreq) + w*(avgFreq);
-    //cout << "AvgFreq: " << avgFreq << endl;
+   int time = 0; //ms
+   while (this->responses<team_count && time<timeout) {
+    usleep(1);
+    time++;
+    //runSender();
+   }
 
-    //PID Control of the output delay:
-    const float K = 3; //proportional of a PID
-    
-    //cout << "desiredFreq:" << desiredFreq << " currtFreq:" << currtFreq << endl;
-    int error = avgFreq-desiredFreq; 
-    long int delay = currentDelay + K*error;
-    //cout << "error:" << error << " prevDelay:" << currentDelay << " newDelay:" << delay << endl;
+   if (time>timeout)
+      cout << "Timeout! time:" << time << endl;
 
-    if (delay>100000) {
-        cerr << "Warning, delay limit reached (>100000): " << delay << endl;
-    }
-    if (delay<0) {
-        //cerr << "Warning, delay < 0: " << delay << endl;
-        delay = 0;
-    }
 
-    return delay;
+   //cout << "waitTeams n resp:" << this->responses << "/" << team_count << " time:" << time << endl;
+
 }
 
 void Simulator::runPhysics(){
@@ -315,9 +298,8 @@ void Simulator::runPhysics(){
     arbiter.allocReport(&report);
     interface_sender.createSocketSendState(&global_state, this->address + std::to_string(port));
 
-	 updateReport();
+	updateReport();
     while(!finish_match){
-        usleep(delay);
 
         //physics->setBallVelocity(btVector3(0.1, 0, 0));
         loopBullet++;
@@ -341,7 +323,13 @@ void Simulator::runPhysics(){
             }
         }
 
-        runSender();
+        if (simTime>=stepNextSend) {
+            //cout << "Sent " << stepNextSend << "ms" << endl;
+            this->responses = 0;
+            //wait response
+            waitTeams(SYNC_TIMEOUT);
+            stepNextSend += commandFreq;
+        }
     }
 }
 
@@ -418,7 +406,7 @@ void Simulator::runStrategies(){
     }
 
     while(!finish_match){
-        usleep(delay);
+        usleep(1);
 
         if(!gameState->sameState){
             updateWorld();
