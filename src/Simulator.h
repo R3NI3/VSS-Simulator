@@ -54,6 +54,7 @@ private:
     int port;
     string address;
 	bool enableBlue;
+    bool is_sync;
 
     Report report;
     bool finish_match;
@@ -104,7 +105,9 @@ private:
 
 public:
 	Simulator();
-	void runSimulator(int argc, char *argv[], ModelStrategy* strategyTeam, ModelStrategy* strategyAdv, int rate, int qtd_goal, bool develop_mode, int port, bool randInit, int iaMode);
+	void runSimulator(int argc, char *argv[], ModelStrategy* strategyTeam, ModelStrategy* strategyAdv,
+                      int rate, int qtd_goal, bool develop_mode, int port, bool randInit, int iaMode,
+                      bool gk_train, bool is_sync);
 
 	void runPhysics();
 	void runStrategies();

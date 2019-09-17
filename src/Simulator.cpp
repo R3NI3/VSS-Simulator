@@ -50,13 +50,15 @@ Simulator::Simulator(){
 }
 
 void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTeam, ModelStrategy *stratYellowTeam,
-                             int rate, int qtd_of_goals, bool develop_mode, int port, bool randInit, int iaMode){
+                             int rate, int qtd_of_goals, bool develop_mode, int port, bool randInit, int iaMode,
+                             bool gk_train, bool is_sync){
     this->fast_travel = fast_travel;
     this->qtd_of_goals = qtd_of_goals;
     this->develop_mode = develop_mode;
     this->address = "tcp://*:";
     this->port = port;
 	this->enableBlue = false;
+    this->is_sync = is_sync;
 
     if (iaMode == 1)
 		this->enableBlue = true;
@@ -84,7 +86,7 @@ void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTea
 		exit(1);
 	}
 
-	physics = new Physics(numTeams, randInit);
+	physics = new Physics(numTeams, randInit, gk_train);
 
     vector<RobotPhysics*> gRobots = physics->getAllRobots();
 
@@ -327,7 +329,12 @@ void Simulator::runPhysics(){
             //cout << "Sent " << stepNextSend << "ms" << endl;
             this->responses = 0;
             //wait response
-            waitTeams(SYNC_TIMEOUT);
+            if (this->is_sync == true){
+                waitTeams(SYNC_TIMEOUT);
+            } else {
+                runSender();
+                usleep(10000); //10 ms
+            }
             stepNextSend += commandFreq;
         }
     }
