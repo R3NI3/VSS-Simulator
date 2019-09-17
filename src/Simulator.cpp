@@ -49,7 +49,7 @@ Simulator::Simulator(){
     has_new_name_team_2 = false;
 }
 
-void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTeam, ModelStrategy *stratYellowTeam, 
+void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTeam, ModelStrategy *stratYellowTeam,
                              int rate, int qtd_of_goals, bool develop_mode, int port, bool randInit, int iaMode){
     this->fast_travel = fast_travel;
     this->qtd_of_goals = qtd_of_goals;
@@ -58,7 +58,7 @@ void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTea
     this->port = port;
 	this->enableBlue = false;
 
-    if (iaMode == 1) 
+    if (iaMode == 1)
 		this->enableBlue = true;
 
     //sim sync control
@@ -67,7 +67,7 @@ void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTea
     timeStep = SIMULATION_TIME_STEP;
 
     cout << "Sincro time:" << rate << endl;
-    
+
     int numTeams = 0;
 	if(stratBlueTeam) {
 		this->strategies.push_back(stratBlueTeam);
@@ -98,11 +98,11 @@ void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTea
         gameState->robotStrategiesAdv = robotStrategiesTeam;
     }
 
-    thread_physics = new thread(bind(&Simulator::runPhysics, this));
-    thread_strategies = new thread(bind(&Simulator::runStrategies, this));
+    thread_physics = new thread(std::bind(&Simulator::runPhysics, this));
+    thread_strategies = new thread(std::bind(&Simulator::runStrategies, this));
     //thread_send = new thread(bind(&Simulator::runSender, this));
-    thread_receive_team1 = new thread(bind(&Simulator::runReceiveTeam1, this));
-    thread_receive_team2 = new thread(bind(&Simulator::runReceiveTeam2, this));
+    thread_receive_team1 = new thread(std::bind(&Simulator::runReceiveTeam1, this));
+    thread_receive_team2 = new thread(std::bind(&Simulator::runReceiveTeam2, this));
 
     thread_physics->join();
     thread_strategies->join();

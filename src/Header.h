@@ -29,6 +29,7 @@ copies or substantial portions of the Software.
 #include <string>
 #include "thread"
 #include <ctime>
+#include <functional>
 
 using namespace std;
 
