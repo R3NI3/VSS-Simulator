@@ -184,11 +184,11 @@ void Physics::init_goalkeeper_train(bool randInit) {
         vector<btVector3> robots;
         vector<btVector3> angles;
         vector<btVector3> posBall;
-        posBall.push_back(btVector3((rand()%150)+10, 0, (rand()%110)+10));
+        posBall.push_back(btVector3((rand()%145)+15, 0, (rand()%105)+15));
         int x1, z1, ang1;
 
         //goalkeeper
-        robots.push_back(btVector3(10-2+rand()%4,5,SIZE_DEPTH/2.0-2+rand()%4));
+        robots.push_back(btVector3(30-20+rand()%40,5,SIZE_DEPTH/2.0-20+rand()%40));
         if (rand()%2==0)
             angles.push_back(btVector3(0,90-5+rand()%10,0));
         else
@@ -213,9 +213,14 @@ void Physics::init_goalkeeper_train(bool randInit) {
         }
 
         setRobotsPosition(robots, angles);
+        float dy = (SIZE_DEPTH/2.0) - posBall[0].getZ();
+        float dx = 10 - posBall[0].getX();
+        float theta = atan2(dy,dx);
 
+        float vx = (-50*(rand()%100))/100.0-50;
+        float vy = vx * tan(theta);
         setBallPosition(posBall[0]);
-        setBallVelocity(btVector3((-90*(rand()%100))/100.0-10, 0, (2*(rand()%100))/100.0-1));
+        setBallVelocity(btVector3(vx + (((rand()%100)/5.0) - 10), 0, vy +(((rand()%100)/5.0) - 10)));//(2*(rand()%100))-1));
     } else {
         vector<btVector3> robots;
 
