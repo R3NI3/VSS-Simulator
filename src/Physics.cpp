@@ -16,11 +16,13 @@ copies or substantial portions of the Software.
 #include "Physics.h"
 #include <sstream>
 
-Physics::Physics(int numTeams, bool randInit){
+Physics::Physics(int numTeams, int initAgents, int initBall){
     this->numTeams = numTeams;
     this->numRobotsTeam = NUM_ROBOTS_TEAM;
+    this->initAgents = initAgents;
+    this->initBall = initBall;
 
-	collisionConfig = new btDefaultCollisionConfiguration();
+    collisionConfig = new btDefaultCollisionConfiguration();
     dispatcher = new btCollisionDispatcher(collisionConfig);
     broadphase = new btDbvtBroadphase();
     solver = new btSequentialImpulseConstraintSolver();
@@ -31,7 +33,8 @@ Physics::Physics(int numTeams, bool randInit){
     world->setDebugDrawer(glDebugDrawer);
     gContactAddedCallback = callBackHitFunc;
 
-    registBodies(randInit);
+    registBodies();
+    this->init_positions();
 }
 
 Physics::~Physics(){
@@ -131,18 +134,18 @@ void Physics::init_penalty_team_1() {
     robots.push_back(btVector3(80,5,78));
     angles.push_back(btVector3(0,rand()%360,0));
 
+    robots.push_back(btVector3(80,5,52));
+    angles.push_back(btVector3(0,rand()%360,0));
+
+    robots.push_back(btVector3(80,5,104));
+    angles.push_back(btVector3(0,rand()%360,0));
+
     //goalkeeper
     robots.push_back(btVector3(160-2+rand()%4,5,SIZE_DEPTH/2.0-2+rand()%4));
     if (rand()%2==0)
         angles.push_back(btVector3(0,90-5+rand()%10,0));
     else
         angles.push_back(btVector3(0,0-5+rand()%10,0));
-
-    robots.push_back(btVector3(80,5,52));
-    angles.push_back(btVector3(0,rand()%360,0));
-
-    robots.push_back(btVector3(80,5,104));
-    angles.push_back(btVector3(0,rand()%360,0));
 
     setBallPosition(btVector3(122.5-1+rand()%2, 2.0, SIZE_DEPTH/2.0-1+rand()%2));
     setRobotsPosition(robots, angles);
@@ -152,17 +155,18 @@ void Physics::init_penalty_team_2() {
     vector<btVector3> robots;
     vector<btVector3> angles;
 
-    //goalkeeper
+    robots.push_back(btVector3(90,5,52));
+    angles.push_back(btVector3(0,rand()%360,0));
+
+    robots.push_back(btVector3(90,5,104));
+    angles.push_back(btVector3(0,rand()%360,0));
+
+//goalkeeper
     robots.push_back(btVector3(10-2+rand()%4,5,SIZE_DEPTH/2.0-2+rand()%4));
     if (rand()%2==0)
         angles.push_back(btVector3(0,90-5+rand()%10,0));
     else
         angles.push_back(btVector3(0,0-5+rand()%10,0));
-
-    robots.push_back(btVector3(90,5,52));
-    angles.push_back(btVector3(0,rand()%360,0));
-    robots.push_back(btVector3(90,5,104));
-    angles.push_back(btVector3(0,rand()%360,0));
 
     //striker
     robots.push_back(btVector3(56-2+rand()%4,5,SIZE_DEPTH/2.0-2+rand()%4));
@@ -185,16 +189,9 @@ void Physics::init_goalkeeper_train() {
         posBall.push_back(btVector3((rand()%150)+10, 0, (rand()%110)+10));
         int x1, z1, ang1;
 
-        //goalkeeper
-        robots.push_back(btVector3(10-2+rand()%4,5,SIZE_DEPTH/2.0-2+rand()%4));
-        if (rand()%2==0)
-            angles.push_back(btVector3(0,90-5+rand()%10,0));
-        else
-            angles.push_back(btVector3(0,0-5+rand()%10,0));
+        //others
 
-         //others
-
-        for(int i = 1;i < 2*numRobotsTeam;i++){
+        for(int i = 0;i < numRobotsTeam-1;i++){
             x1 = (rand()%130)+20;
             z1 = (rand()%110)+10;
             ang1 = (rand()%360);
@@ -210,33 +207,22 @@ void Physics::init_goalkeeper_train() {
             robots.push_back(pos1);
         }
 
-        setRobotsPosition(robots, angles);
+        //goalkeeper left
+        robots.push_back(btVector3(10-2+rand()%4,5, SIZE_DEPTH/2.0-12+rand()%24));
+        if (rand()%2==0)
+            angles.push_back(btVector3(0,90-5+rand()%10,0));
+        else
+            angles.push_back(btVector3(0,0-5+rand()%10,0));
 
-        setBallPosition(posBall[0]);
-        setBallVelocity(btVector3((-90*(rand()%100))/100.0-10, 0, (2*(rand()%100))/100.0-1));
-}
+         //others
 
-void Physics::init_positions() {
-
-//      init_goalkeeper_train();
-
-    if (this->randInit) {
-        vector<btVector3> robots;
-        vector<btVector3> angles;
-        vector<btVector3> posBall;
-        posBall.push_back(btVector3((rand()%150)+10, 0, (rand()%100)+10));
-        int x1, x2, z1, z2, ang1, ang2;
-
-        for(int i = 0;i < numRobotsTeam;i++){
+        for(int i = 0;i < numRobotsTeam-1;i++){
             x1 = (rand()%130)+20;
-            x2 = (rand()%130)+20;
-            ang1 = rand()%360;
             z1 = (rand()%110)+10;
-            z2 = (rand()%110)+10;
-            ang2 = rand()%360;
+            ang1 = (rand()%360);
 
             btVector3 pos1 = btVector3(x1, 5, z1);
-            btVector3 pos2 = btVector3(x2, 5, z2);
+            angles.push_back(btVector3(0,ang1,0));
 
             while (!(check_dist(robots, pos1) && check_dist(posBall, pos1))){
                 x1 = (rand()%130)+20;
@@ -244,38 +230,238 @@ void Physics::init_positions() {
                 pos1 = btVector3(x1, 5, z1);
             }
             robots.push_back(pos1);
-            angles.push_back(btVector3(0,ang1,0));
-
-            while (!(check_dist(robots, pos2) && check_dist(posBall, pos2))){
-                x2 = (rand()%130)+20;
-                z2 = (rand()%110)+10;
-                pos2 = btVector3(x2, 5, z2);
-            }
-            robots.push_back(pos2);
-            angles.push_back(btVector3(0,ang2,0));
         }
+
+        //goalkeeper right
+        robots.push_back(btVector3(160-2+rand()%4,5,SIZE_DEPTH/2.0-12+rand()%24));
+        if (rand()%2==0)
+            angles.push_back(btVector3(0,90-5+rand()%10,0));
+        else
+            angles.push_back(btVector3(0,0-5+rand()%10,0));
 
         setRobotsPosition(robots, angles);
 
         setBallPosition(posBall[0]);
-        setBallVelocity(btVector3((2*(rand()%100))/100.0-1, 0, (8*(rand()%100))/100.0-4));
-    } else {
-
-        vector<btVector3> robots;
-
-        robots.push_back(btVector3(55,4,45));
-        robots.push_back(btVector3(35,4,30));
-        robots.push_back(btVector3(15,4,SIZE_DEPTH- 55));
-        robots.push_back(btVector3(SIZE_WIDTH-55,4,85));
-        robots.push_back(btVector3(SIZE_WIDTH-25,4,SIZE_DEPTH - SIZE_DEPTH/2.5 + 20));
-        robots.push_back(btVector3(SIZE_WIDTH-15,4,55));
-
-        setBallPosition(btVector3( (SIZE_WIDTH/2.0)+10 , 2.0, SIZE_DEPTH/2.0));
-        setRobotsPosition(robots);
-    }
+        setBallVelocity(btVector3((-90*(rand()%100))/100.0-10, 0, (2*(rand()%100))/100.0-1));
 }
 
-void Physics::registBodies(bool randInit){
+void Physics::init_one_agent_random() {
+
+	vector<btVector3> robots;
+	vector<btVector3> angles;
+	int x1, z1, ang1;
+
+	x1 = (rand()%130)+20;
+	z1 = (rand()%110)+10;
+	ang1 = rand()%360;
+
+	setBallPosition(btVector3((rand()%150)+10, 0, (rand()%100)+10));
+   setBallVelocity(btVector3((2*(rand()%100))/100.0-1, 0, (8*(rand()%100))/100.0-4));
+
+	btVector3 pos1 = btVector3(x1, 5, z1);
+	robots.push_back(pos1);
+	angles.push_back(btVector3(0,ang1,0));
+	
+	for(int i = 1;i < 2*numRobotsTeam;i++){
+		robots.push_back(btVector3(20+10*i, 5, -20));
+		angles.push_back(btVector3(0,0,0));
+	}
+
+   setRobotsPosition(robots, angles);
+}
+
+
+void Physics::init_default_positions() {
+
+     vector<btVector3> robots;
+
+     robots.push_back(btVector3(55,4,45));
+     robots.push_back(btVector3(35,4,30));
+     robots.push_back(btVector3(15,4,SIZE_DEPTH- 55));
+     robots.push_back(btVector3(SIZE_WIDTH-55,4,85));
+     robots.push_back(btVector3(SIZE_WIDTH-25,4,SIZE_DEPTH - SIZE_DEPTH/2.5 + 20));
+     robots.push_back(btVector3(SIZE_WIDTH-15,4,55));
+
+     setBallPosition(btVector3( (SIZE_WIDTH/2.0)+10 , 2.0, SIZE_DEPTH/2.0));
+     setRobotsPosition(robots);
+}
+
+void Physics::init_base_positions() {
+
+     vector<btVector3> rbt1, rbt2;
+     vector<btVector3> angles;
+     vector<btVector3> posBall;
+     posBall.push_back(btVector3((rand()%130)+20, 0, (rand()%100)+10));
+     int x1, x2, z1, z2, ang1, ang2;
+
+     for(int i = 0;i < numRobotsTeam;i++){
+			if (i==0) {
+				x1 = (rand()%40)+110;
+				x2 = 170-((rand()%40)+110);
+			}
+			else if (i==1){
+				x1 = (rand()%75)+30;
+				x2 = 170-((rand()%75)+30);
+			}
+			else if (i==2) {
+				x1 = (rand()%10)+20;
+				x2 = 170-((rand()%10)+20);
+			}
+
+         z1 = (rand()%100)+15;
+         z2 = (rand()%100)+15;
+         ang1 = rand()%360;
+         ang2 = rand()%360;
+
+         btVector3 pos1 = btVector3(x1, 5, z1);
+         btVector3 pos2 = btVector3(x2, 5, z2);
+      
+		   while (!(check_dist(rbt1, pos1) && check_dist(rbt2, pos1) && check_dist(posBall, pos1))){
+					if (i==0) {
+						x1 = (rand()%40)+110;
+					}
+					else if (i==1){
+						x1 = (rand()%75)+30;
+					}
+					else if (i==2) {
+						x1 = (rand()%10)+20;
+					}
+					z1 = (rand()%100)+15;
+					pos1 = btVector3(x1, 5, z1);
+         }
+
+         rbt1.push_back(pos1);
+         angles.push_back(btVector3(0,ang1,0));
+
+         while (!(check_dist(rbt1, pos2) && check_dist(rbt2, pos1) && check_dist(posBall, pos2))){
+				if (i==0) {
+					x2 = 170-((rand()%40)+110);
+				}
+				else if (i==1){
+					x2 = 170-((rand()%75)+30);
+				}
+				else if (i==2) {
+					x2 = 170-((rand()%10)+20);
+				}
+
+				z2 = (rand()%100)+15;
+				pos2 = btVector3(x2, 5, z2);
+         }
+
+         rbt2.push_back(pos2);
+         angles.push_back(btVector3(0,ang2,0));
+     }
+
+	  rbt1.insert(std::end(rbt1), std::begin(rbt2), std::end(rbt2));
+     setRobotsPosition(rbt1, angles);
+
+     setBallPosition(posBall[0]);
+     setBallVelocity(btVector3((2*(rand()%100))/100.0-1, 0, (8*(rand()%100))/100.0-4));
+}
+
+void Physics::init_random_positions() {
+
+     vector<btVector3> robots;
+     vector<btVector3> angles;
+     vector<btVector3> posBall;
+     posBall.push_back(btVector3((rand()%130)+20, 0, (rand()%100)+10));
+     int x1, x2, z1, z2, ang1, ang2;
+
+     for(int i = 0;i < numRobotsTeam;i++){
+         x1 = (rand()%130)+20;
+         x2 = (rand()%130)+20;
+         ang1 = rand()%360;
+         z1 = (rand()%110)+10;
+         z2 = (rand()%110)+10;
+         ang2 = rand()%360;
+
+         btVector3 pos1 = btVector3(x1, 5, z1);
+         btVector3 pos2 = btVector3(x2, 5, z2);
+
+         while (!(check_dist(robots, pos1) && check_dist(posBall, pos1))){
+             x1 = (rand()%130)+20;
+             z1 = (rand()%110)+10;
+             pos1 = btVector3(x1, 5, z1);
+         }
+         robots.push_back(pos1);
+         angles.push_back(btVector3(0,ang1,0));
+
+         while (!(check_dist(robots, pos2) && check_dist(posBall, pos2))){
+             x2 = (rand()%130)+20;
+             z2 = (rand()%110)+10;
+             pos2 = btVector3(x2, 5, z2);
+         }
+         robots.push_back(pos2);
+         angles.push_back(btVector3(0,ang2,0));
+     }
+
+     setRobotsPosition(robots, angles);
+
+     setBallPosition(posBall[0]);
+     setBallVelocity(btVector3((2*(rand()%100))/100.0-1, 0, (8*(rand()%100))/100.0-4));
+}
+
+void Physics::init_ball_center() {
+
+	setBallPosition(btVector3( (SIZE_WIDTH/2.0)+10 , 2.0, SIZE_DEPTH/2.0));
+	setBallVelocity(btVector3(0, 0, 0));
+}
+
+void Physics::init_rand_slow() {
+
+	setBallPosition(btVector3((rand()%130)+20, 2.0, (rand()%100)+10));
+	setBallVelocity(btVector3((2*(rand()%100))/100.0-1, 0, (8*(rand()%100))/100.0-4));
+}
+
+void Physics::init_towards_left_goal() {
+
+	int x = (rand()%130)+20;
+	int z = (rand()%100)+10;
+	setBallPosition(btVector3(x, 0, z));
+
+   setBallVelocity(btVector3((-90*(rand()%100))/100.0-10, 2.0, -(z-65)/2));
+}
+
+void Physics::init_towards_right_goal() {
+
+	int x = (rand()%130)+20;
+	int z = (rand()%100)+10;
+	setBallPosition(btVector3(x, 0, z));
+
+   setBallVelocity(btVector3((90*(rand()%100))/100.0+10, 2.0, -(z-65)/2));
+}
+
+void Physics::init_towards_rand_left_right_goal() {
+	if (rand()%1000 > 500)
+		init_towards_left_goal();
+   else
+		init_towards_right_goal();
+}
+
+void Physics::init_positions() {
+	//printf("init agents: %d init ball: %d", this->initAgents, this->initBall);
+	switch (this->initAgents) {
+		case 1: this->init_random_positions(); break;
+		case 2: this->init_base_positions(); break;
+		case 3: this->init_one_agent_random(); break;
+		case 4: this->init_goalkeeper_train(); break;
+		case 5: this->init_penalty_team_1(); break;
+		case 6: this->init_penalty_team_2(); break;
+		case 0:
+		default: this->init_default_positions(); break;
+   }
+
+	switch (this->initBall) {
+		case 0: this->init_ball_center(); break;
+		case 1: this->init_rand_slow(); break;
+		case 2: this->init_towards_left_goal(); break;
+		case 3: this->init_towards_right_goal(); break;
+		case 4: this->init_towards_rand_left_right_goal(); break;
+	 }
+}
+
+
+void Physics::registBodies(){
     addFloor();
     time_t t;
     srand((unsigned) time(&t));
@@ -283,8 +469,6 @@ void Physics::registBodies(bool randInit){
     vector <btVector3> posTeam2;
     vector <btVector3> posBall;
     int x1,x2,z1,z2;
-
-    this->randInit = randInit;
 
     addBall(2.5, btVector3(85, 0, 65), 0.08); //center
     posTeam1 = vector <btVector3> {btVector3(25,5,SIZE_DEPTH- 55),btVector3(35,5,30),btVector3(55,5,45)};
@@ -303,10 +487,6 @@ void Physics::registBodies(bool randInit){
             addRobot(Color(0.3,0.3,0.3),posTeam2[i],btVector3(0,-100,0),8,0.25,clrPlayers[i],clrTeams[1], numRobotsTeam+i);
         }
     }
-
-    this->init_positions();
-    //this->init_penalty_team_2();
-    //this->test_penalty();
 
     // PAREDE DE CIMA
     addWall(Color(0,0,0), btVector3((SIZE_WIDTH/2.0) + GOAL_WIDTH, 0, 0), SIZE_WIDTH, 15, 2.5, 0);
@@ -344,18 +524,17 @@ void Physics::registBodies(bool randInit){
     addCorner(Color(0,0,0),btVector3(GOAL_WIDTH+1.25, 0, SIZE_DEPTH-GOAL_WIDTH+1.25), 45, 15, btVector3(0,-45,0));
     // TRIANGULO INFERIOR DIREITO
     addCorner(Color(0,0,0),btVector3(SIZE_WIDTH + GOAL_WIDTH-1.25, 0, SIZE_DEPTH-GOAL_WIDTH-1.25), 45, 15, btVector3(0,45,0));
-    
 }
 
+/*
 void Physics::resetRobotPositions(){
     btVector3 posTeam1[] = {btVector3(15,5,SIZE_DEPTH- 55),btVector3(35,5,30),btVector3(55,5,45)};
     btVector3 posTeam2[] = {btVector3(SIZE_WIDTH-15,5,55),btVector3(SIZE_WIDTH-25,5,SIZE_DEPTH - SIZE_DEPTH/2.5 + 20),btVector3(SIZE_WIDTH-55,5,85)};
 
-    /*
-    btVector3 axis = rotation.normalize();
-        btQuaternion quat(axis,rad);
-        t.setRotation(quat);
-    */
+//    btVector3 axis = rotation.normalize();
+//    btQuaternion quat(axis,rad);
+//    t.setRotation(quat);
+
     for(int i=0;i<genRobots.size()/2;i++){
         btTransform t;
         genRobots[i]->getRigidBody()->getMotionState()->getWorldTransform(t);
@@ -384,6 +563,7 @@ void Physics::resetRobotPositions(){
         genRobots[i]->getRigidBody()->setAngularVelocity(btVector3(0,0,0));
     }
 }
+*/
 
 void Physics::stepSimulation(float timeW,float subStep, float timeStep){
     setupBodiesProp();

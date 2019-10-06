@@ -50,7 +50,7 @@ Simulator::Simulator(){
 }
 
 void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTeam, ModelStrategy *stratYellowTeam, 
-                             int rate, int qtd_of_goals, bool develop_mode, int port, bool randInit, int iaMode){
+                             int rate, int qtd_of_goals, bool develop_mode, int port, int initAgents, int initBall, int iaMode){
     this->fast_travel = fast_travel;
     this->qtd_of_goals = qtd_of_goals;
     this->develop_mode = develop_mode;
@@ -84,7 +84,7 @@ void Simulator::runSimulator(int argc, char *argv[], ModelStrategy *stratBlueTea
 		exit(1);
 	}
 
-	physics = new Physics(numTeams, randInit);
+	physics = new Physics(numTeams, initAgents, initBall);
 
     vector<RobotPhysics*> gRobots = physics->getAllRobots();
 
@@ -323,7 +323,7 @@ void Simulator::runPhysics(){
             }
         }
 
-        if (simTime>=stepNextSend) {
+        if (simTime>=stepNextSend && commandFreq>=0) {
             //cout << "Sent " << stepNextSend << "ms" << endl;
             this->responses = 0;
             //wait response

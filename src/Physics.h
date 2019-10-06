@@ -29,7 +29,8 @@ class Physics{
 private:
 	int numTeams;
 	int numRobotsTeam;
-	bool randInit;
+	int initAgents;
+	int initBall;
 
 	btDynamicsWorld* world;
 	btDispatcher* dispatcher;
@@ -41,13 +42,13 @@ private:
 	vector<BulletObject*> bodies;
 	vector<RobotPhysics*> genRobots;
 
-    void registBodies(bool randInit);
+   void registBodies();
 	void setupBodiesProp();
 
 	btRigidBody* addGenericBody(btCollisionShape* shape,string name, Color clr, btVector3 pos, float mass, btVector3 rotation = btVector3(0,0,0));
     static bool callBackHitFunc(btManifoldPoint& cp,const btCollisionObjectWrapper* obj1,int id1,int index1,const btCollisionObjectWrapper* obj2,int id2,int index2);
 public:
-	Physics(int numTeams, bool randInit);
+	Physics(int numTeams, int initAgents, int initBall);
 	~Physics();
 	void deleteWorldObj();
 
@@ -62,11 +63,21 @@ public:
 	void startDebug();
 	void setDebugWorld(int debugMode);
 
-	void resetRobotPositions();
+	 //void resetRobotPositions();
+	 void init_positions();
+    void init_default_positions();
+    void init_random_positions();
+    void init_base_positions();
+	 void init_one_agent_random();
+    void init_goalkeeper_train();
     void init_penalty_team_1();
     void init_penalty_team_2();
-    void init_positions();
-    void init_goalkeeper_train();
+
+    void init_ball_center();
+    void init_rand_slow();
+    void init_towards_left_goal();
+    void init_towards_right_goal();
+	 void init_towards_rand_left_right_goal();
 
     void test_penalty();
 

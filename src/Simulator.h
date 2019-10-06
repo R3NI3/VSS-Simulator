@@ -104,10 +104,10 @@ private:
 
 public:
 	Simulator();
-	void runSimulator(int argc, char *argv[], ModelStrategy* strategyTeam, ModelStrategy* strategyAdv, int rate, int qtd_goal, bool develop_mode, int port, bool randInit, int iaMode);
+	void runSimulator(int argc, char *argv[], ModelStrategy* strategyTeam, ModelStrategy* strategyAdv, int rate, int qtd_goal, bool develop_mode, int port, int initAgents, int initBall, int iaMode);
 
-	void runPhysics();
-	void runStrategies();
+	 void runPhysics();
+	 void runStrategies();
     void runSender();
     void runReceiveTeam1();
     void runReceiveTeam2();

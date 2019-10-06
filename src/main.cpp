@@ -39,22 +39,22 @@ public:
     }
 };
 
-bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, bool *develop_mode, int *port, bool *random, int *iaMode);
+bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, bool *develop_mode, int *port, int *initAgents, int *initBall, int *iaMode);
 
 int main(int argc, char *argv[]){
     int rate = false;
     int qtd_of_goals = 10;
     bool develop_mode = false;
-    bool rand_init = false;
+    int initAgents = 0, initBall = 0;
     int port;
 	 int iaMode;
 
-    if(argParse(argc, argv, &rate, &qtd_of_goals, &develop_mode, &port, &rand_init, &iaMode)){
+    if(argParse(argc, argv, &rate, &qtd_of_goals, &develop_mode, &port, &initAgents, &initBall, &iaMode)){
         Strategy *stratYellowTeam = new Strategy(); //Original strategy
         Strategy *stratBlueTeam = new Strategy(); //Strategy for tests
 
         Simulator* simulator = new Simulator();
-        simulator->runSimulator(argc, argv, stratBlueTeam, stratYellowTeam, rate, qtd_of_goals, develop_mode, port, rand_init, iaMode);
+        simulator->runSimulator(argc, argv, stratBlueTeam, stratYellowTeam, rate, qtd_of_goals, develop_mode, port, initAgents, initBall, iaMode);
     }else{
         return -1;
     }
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]){
 	return 0;
 }
 
-bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, bool *develop_mode, int *port, bool *random, int *iaMode){
+bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, bool *develop_mode, int *port, int *initAgents, int *initBall, int *iaMode){
     namespace bpo = boost::program_options;
 
     // Declare the supported options.
@@ -73,7 +73,8 @@ bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, bool *develop
 		  ("rate,r", bpo::value<int>()->default_value(250), "Desired command rate. Default: 250ms")
         ("fixed,f", "(Optional) rate becomes a fixed delay value")
         ("develop,d", "(Optional) turn on the develop mode. the time doesn't count.")
-        ("random,a", "(Optional) start objects at random positions, good for training.")
+        ("init_agents,a", bpo::value<int>()->default_value(0), "(Optional) init flag: 0:default positions, 1:random positions, 2: random base positions, 3: one agent, 4: goal_keeper, 5: penalty left, 4: penalty right.")
+		  ("init_ball,b", bpo::value<int>()->default_value(0), "(Optional) init flag: 0:stopped center, 1:random slow, 2: towards left goal, 3: towards right goal, 4: towards a random goal.")
         ("port,p", bpo::value<int>()->default_value(5555), "(Optional) specify port to connect simulator.")
         ("qtd_of_goals,g", bpo::value<std::string>()->default_value("10"), "(Optional) specify the qtd of goals to end the game. 10 to 100");
     bpo::variables_map vm;
@@ -101,10 +102,15 @@ bool argParse(int argc, char** argv, int *rate, int *qtd_of_goals, bool *develop
         *develop_mode = true;
     }
 
-    if (vm.count("random")){
-        *random = true;
-		  std::cout << "Random positions mode" << std::endl;
-    }
+	 if (vm.count("init_agents")){
+		  *initAgents = vm["init_agents"].as<int>();
+         std::cout << "Init Agents:" << *initAgents << std::endl;
+	 }
+
+	 if (vm.count("init_ball")){
+		  *initBall = vm["init_ball"].as<int>();
+         std::cout << "Init Agents:" << *initBall << std::endl;
+	 }
 
     stringstream ss;
     ss << vm["qtd_of_goals"].as<string>();

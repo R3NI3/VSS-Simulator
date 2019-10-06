@@ -103,13 +103,13 @@ void Strategy::updateFunctions(){
         int distanceRobotBall = (robotStrategiesTeam[i]->getPosition() - ballTarget).length();
 
         switch(robotStrategiesTeam[i]->getId()){
-            case 0:{
+            case 2:{
                 robotStrategiesTeam[i]->setLocalFunction(LocalFunc::goal);
             }break;
             case 1:{               
                 robotStrategiesTeam[i]->setLocalFunction(LocalFunc::deffense);
             }break;
-            case 2:{
+            case 0:{
                 robotStrategiesTeam[i]->setLocalFunction(LocalFunc::attack);
             }break;
         }
