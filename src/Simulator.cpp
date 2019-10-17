@@ -23,6 +23,7 @@ Simulator::Simulator(){
 	loopBullet = 0;
 	numRobotsTeam = NUM_ROBOTS_TEAM;
 	responses = 0;
+	stepNextSend = 0;
 
 	gameState = new GameState();
     caseWorld = NONE;
@@ -264,6 +265,7 @@ void Simulator::waitTeams(int timeout) {
 
    runSender();
 
+	//cout << "Teams status" << status_team_1 << status_team_2 << endl;
    while (true) {
        if (status_team_1>=0) team_count++;
        if (status_team_2>=0) team_count++;
@@ -323,6 +325,7 @@ void Simulator::runPhysics(){
             }
         }
 
+		  //cout << "cmd freq:" << commandFreq << ", " << simTime <<", " << stepNextSend << endl;
         if (simTime>=stepNextSend && commandFreq>=0) {
             //cout << "Sent " << stepNextSend << "ms" << endl;
             this->responses = 0;
