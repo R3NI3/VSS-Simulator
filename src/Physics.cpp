@@ -489,20 +489,20 @@ void Physics::registBodies(){
     }
 
     // PAREDE DE CIMA
-    addWall(Color(0,0,0), btVector3((SIZE_WIDTH/2.0) + GOAL_WIDTH, 0, 0), SIZE_WIDTH, 15, 2.5, 0);
+    //addWall(Color(0,0,0), btVector3((SIZE_WIDTH/2.0) + GOAL_WIDTH, 0, 0), SIZE_WIDTH, 15, 2.5, 0);
     // PAREDE DE BAIXO
-    addWall(Color(0,0,0), btVector3((SIZE_WIDTH/2.0) + GOAL_WIDTH, 0, SIZE_DEPTH), SIZE_WIDTH, 15, 2.5, 0);
+    //addWall(Color(0,0,0), btVector3((SIZE_WIDTH/2.0) + GOAL_WIDTH, 0, SIZE_DEPTH), SIZE_WIDTH, 15, 2.5, 0);
 
     // GOL ESQUERDO
-    addWall(Color(0,0,0), btVector3(0, 0, SIZE_DEPTH/2.0), 2.5, 15, 40.0, 0);
+   // addWall(Color(0,0,0), btVector3(0, 0, SIZE_DEPTH/2.0), 2.5, 15, 40.0, 0);
     // PAREDE DE CIMA DO GOL ESQUERDO
-    addWall(Color(0,0,0), btVector3(GOAL_WIDTH, 0, 45/2.0-1.25), 2.5, 15, 45.0, 0);
+    //addWall(Color(0,0,0), btVector3(GOAL_WIDTH, 0, 45/2.0-1.25), 2.5, 15, 45.0, 0);
     // PAREDE DE BAIXO DO GOL ESQUERDO
-    addWall(Color(0,0,0), btVector3(GOAL_WIDTH, 0, SIZE_DEPTH-(45/2.0)+1.25 ), 2.5, 15, 45.0, 0);
+   // addWall(Color(0,0,0), btVector3(GOAL_WIDTH, 0, SIZE_DEPTH-(45/2.0)+1.25 ), 2.5, 15, 45.0, 0);
     // PAREDE DE CIMA DENTRO DO GOL ESQUERDO
-    addWall(Color(0,0,0), btVector3((GOAL_WIDTH/2.0), 0, SIZE_DEPTH/2.0-(45/2.0) ), GOAL_WIDTH, 15, 2.5, 0);
+    //addWall(Color(0,0,0), btVector3((GOAL_WIDTH/2.0), 0, SIZE_DEPTH/2.0-(45/2.0) ), GOAL_WIDTH, 15, 2.5, 0);
     // PAREDE DE BAIXO DENTRO DO GOL ESQUERDO
-    addWall(Color(0,0,0), btVector3((GOAL_WIDTH/2.0), 0, SIZE_DEPTH/2.0+(45/2.0) ), GOAL_WIDTH, 15, 2.5, 0);
+    //addWall(Color(0,0,0), btVector3((GOAL_WIDTH/2.0), 0, SIZE_DEPTH/2.0+(45/2.0) ), GOAL_WIDTH, 15, 2.5, 0);
 
     // GOL DIREITO
     addWall(Color(0,0,0), btVector3(SIZE_WIDTH + (2.0*GOAL_WIDTH), 0, SIZE_DEPTH/2.0), 2.5, 15, 40.0, 0);

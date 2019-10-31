@@ -4,9 +4,10 @@
 Arbiter::Arbiter(){
 	refresh = false;
 	minutes = 0;
-    sysLastTime = -1;
-    simLastTime = -1;
-    penalty_team_1_counter = penalty_team_2_counter = 0;
+	sysLastTime = -1;
+	simLastTime = -1;
+	penalty_team_1_counter = penalty_team_2_counter = 0;
+	fault_team_1_counter = fault_team_2_counter = 0;
 }
 
 void Arbiter::allocPhysics(Physics *physics){
@@ -22,6 +23,97 @@ long int Arbiter::sysTimeMS() {
     gettimeofday(&tp, NULL);
     return tp.tv_sec * 1000 + tp.tv_usec / 1000;
 }
+
+int Arbiter::is_fault_team_1() {
+    int AREA_X_MIN = 160-15;
+    int AREA_Z_MIN = 30;
+    int AREA_Z_MAX = 100;
+
+    btVector3 ball = physics->getBallPosition();
+
+    if (ball.getX() < AREA_X_MIN || ball.getZ() < AREA_Z_MIN || ball.getZ() > AREA_Z_MAX) {
+        //cerr << "ball not in area:" << ball.getX() << "," << ball.getZ() << endl;
+        fault_team_1_counter = 0;
+        return false;
+    }
+    //cerr << "ball in area" << endl;
+
+    AREA_X_MIN-=4;
+    AREA_Z_MIN-=4;
+    AREA_Z_MAX+=4;
+
+    vector<RobotPhysics*> listRobots = physics->getAllRobots();
+
+    int out_area = 0;
+    int i=0;
+    for (vector<RobotPhysics*>::iterator it = listRobots.begin(); i<3; it++,i++) {
+        btVector3 pos = physics->getRobotPosition(*it);
+        if (pos.getX() < AREA_X_MIN || pos.getZ() < AREA_Z_MIN || pos.getZ() > AREA_Z_MAX) {
+            out_area++;
+				//cout << "Robot not in area:" << pos.getX() << "," << pos.getZ() << endl;
+		  } //else
+  				//cout << "Robot in area:" << pos.getX() << "," << pos.getZ() << endl;
+
+		  if (out_area>1) break;
+    }
+
+    if (out_area < 2) //fault
+        fault_team_1_counter++;
+	 else
+        fault_team_1_counter = 0;
+
+    if (fault_team_1_counter>=5) {
+        fault_team_1_counter = 0;
+        return true;
+    }
+    return false;
+}
+
+
+int Arbiter::is_fault_team_2() {
+
+    int AREA_X_MAX = 10+15;
+    int AREA_Z_MIN = 30;
+    int AREA_Z_MAX = 100;
+
+    btVector3 ball = physics->getBallPosition();
+
+    if (ball.getX() > AREA_X_MAX || ball.getZ() < AREA_Z_MIN || ball.getZ() > AREA_Z_MAX) {
+        //cerr << "ball not in area:" << ball.getX() << "," << ball.getZ() << endl;
+        fault_team_2_counter = 0;
+        return false;
+    }
+    //cerr << "ball in area" << endl;
+
+    AREA_X_MAX+=4;
+    AREA_Z_MIN-=4;
+    AREA_Z_MAX+=4;
+
+    vector<RobotPhysics*> listRobots = physics->getAllRobots();
+
+    int out_area = 0;
+    for (vector<RobotPhysics*>::iterator it = listRobots.begin()+3; it!=listRobots.end(); it++) {
+        btVector3 pos = physics->getRobotPosition(*it);
+        if (pos.getX() > AREA_X_MAX || pos.getZ() < AREA_Z_MIN || pos.getZ() > AREA_Z_MAX) {
+            out_area++;
+            //cout << "Robot not in area:" << pos.getX() << "," << pos.getZ() << endl;
+        } //else
+            //cout << "Robot in area:" << pos.getX() << "," << pos.getZ() << endl;
+    }
+
+    if (out_area < 2)//fault
+        fault_team_2_counter++;
+    else
+        fault_team_2_counter = 0;
+
+
+    if (fault_team_2_counter>=5) {// 
+        fault_team_2_counter = 0;
+        return true;
+    }
+    return false;
+}
+
 
 int Arbiter::is_penalty_team_1() {
 
@@ -61,7 +153,7 @@ int Arbiter::is_penalty_team_1() {
         penalty_team_1_counter = 0;
 
 
-    if (penalty_team_1_counter>=120) {//2 seconds
+    if (penalty_team_1_counter>=20) {// 1/5 seconds
         penalty_team_1_counter = 0;
         return true;
     }
@@ -69,7 +161,7 @@ int Arbiter::is_penalty_team_1() {
 }
 
 int Arbiter::is_penalty_team_2() {
-    int AREA_X_MIN = 150-15;
+    int AREA_X_MIN = 160-15;
     int AREA_Z_MIN = 30;
     int AREA_Z_MAX = 100;
 
@@ -103,7 +195,7 @@ int Arbiter::is_penalty_team_2() {
     else
         penalty_team_2_counter = 0;
 
-    if (penalty_team_2_counter>=120) {//2 seconds
+    if (penalty_team_2_counter>=20) {// 1/5 seconds
         penalty_team_2_counter = 0;
         return true;
     }
@@ -129,6 +221,15 @@ int Arbiter::checkWorld(){
 		position_objects_after_goal_team_2();
 	}
 
+    if (is_fault_team_1()) {
+        cerr << "---Fault RIGHT ! ---" << endl;
+        physics->init_penalty_team_2();
+    } else
+    if (is_fault_team_2()) {
+        cerr << "---Fault LEFT ! ---" << endl;
+        physics->init_penalty_team_1();
+    }
+	 else
     if (is_penalty_team_1()) {
         cerr << "---PENALTY LEFT ! ---" << endl;
         physics->init_penalty_team_2();

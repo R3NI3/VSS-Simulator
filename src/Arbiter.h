@@ -18,6 +18,9 @@ protected:
 	int minutes;
     long int sysLastTime;
     long int simLastTime;
+
+    int fault_team_1_counter;
+    int fault_team_2_counter;
     int penalty_team_1_counter;
     int penalty_team_2_counter;
 public:
@@ -37,6 +40,8 @@ public:
 	void penalty_team_1();
 	void penalty_team_2();
 
+	int is_fault_team_1();
+	int is_fault_team_2();
 	int is_penalty_team_1();
 	int is_penalty_team_2();
 };
